@@ -1,0 +1,1 @@
+make clean && make && qemu-system-i386 -hda build/os.img

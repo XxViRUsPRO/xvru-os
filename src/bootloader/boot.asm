@@ -1,0 +1,73 @@
+org 0x7C00
+
+bits 16
+_main16:
+    MOV [BOOT_DISK], DL
+
+    CLI
+    MOV AX, 0
+    MOV DS, AX
+    MOV ES, AX
+    MOV SS, AX
+    MOV SP, 0x7C00
+    STI
+
+    ; INIT VIDEO MODE
+    MOV AX, 0x13
+    INT 0x10
+
+    ; READ FIRST 50 SECTOR AT KERNEL LOCATION
+    MOV BX, KERNEL_LOC
+    MOV DH, 50
+
+    ; DISK READ
+    MOV AH, 0x02
+    MOV AL, DH
+    MOV CH, 0x00
+    MOV DH, 0x00
+    MOV CL, 0x02
+    MOV DL, [BOOT_DISK]
+    INT 0x13
+
+    ; HERE MAKE THE JUMP TO 32BIT
+    CLI
+    LGDT [GDT_DESC]
+    MOV EAX, CR0
+    OR EAX, 0x1
+    MOV CR0, EAX
+    JMP CODE_SEG:START_PROTECTED
+
+%include "gdt.inc"
+
+;
+; 32BIT PROTECTED MODE
+;
+bits 32
+START_PROTECTED:
+    CLI
+    MOV AX, DATA_SEG
+    MOV DS, AX
+    MOV ES, AX
+    MOV SS, AX
+    MOV FS, AX
+    MOV GS, AX
+
+    ; SETUP THE STACK
+    MOV EBP, 0x90000
+    MOV ESP, EBP
+
+    JMP KERNEL_LOC
+
+
+;
+;   GLOBAL VARIABLES
+;
+BOOT_DISK: DB 0x00
+
+;
+;   CONSTANTS
+;
+KERNEL_LOC EQU 0x7EF0
+
+TIMES 510-($-$$) DB 0
+DW 0xAA55
