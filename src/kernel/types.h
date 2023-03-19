@@ -22,4 +22,6 @@
 
 #define bool u8
 
+#define size_t u32
+
 #endif

@@ -1,5 +1,4 @@
 #include "display.h"
-#include "types.h"
 #include "magic.h"
 
 void setup_text(void)
