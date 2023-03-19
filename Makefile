@@ -1,9 +1,9 @@
 BUILD_DIR=build
 SRC_DIR=src
 
-.PHONY: all bootloader clean
+.PHONY: all bootloader kernel clean always debug run os
 
-all: os
+all: os run
 
 os: $(BUILD_DIR)/os.img
 
@@ -20,6 +20,8 @@ kernel: $(BUILD_DIR)/kernel/kernel.bin
 $(BUILD_DIR)/kernel/kernel.bin: always
 	$(MAKE) -C $(SRC_DIR)/kernel BUILD_DIR=$(abspath $(BUILD_DIR))
 
+run: os
+	qemu-system-i386 -hda build/os.img
 
 always:
 	mkdir -p $(BUILD_DIR)
