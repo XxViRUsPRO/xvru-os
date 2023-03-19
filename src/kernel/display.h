@@ -1,13 +1,21 @@
-#pragma once
-#include <stdint.h>
+#ifndef _DISPLAY_H_
+#define _DISPLAY_H_
 
-#define VGA_ADDRESS 0xA0000
+#include "types.h"
 
-enum VGA_MODES
-{
-    VGA_MODE_320x200x256 = 0x13,
-};
+#define VIDEO_ADDRESS 0xb8000
+#define MAX_ROWS 25
+#define MAX_COLS 80
 
-void putc_vga(char c, uint32_t x, uint32_t y, uint8_t color, uint8_t *buffer = (uint8_t *)VGA_ADDRESS);
-void puts_vga(const char *str, uint32_t x, uint32_t y, uint8_t color, uint8_t *buffer = (uint8_t *)VGA_ADDRESS);
-void bezier_curve(int x[4], int y[4], uint8_t color, uint8_t *buffer = (uint8_t *)VGA_ADDRESS);
+static u8 cursor_x = 0;
+static u8 cursor_y = 0;
+
+void setup_text(void);
+void clear_text(void);
+void write_char(const char c, int pos, char color);
+void write_text(const char *text, int pos, char color);
+void set_cursor(int x, int y);
+void enable_cursor(u8 cursor_start, u8 cursor_end);
+void disable_cursor(void);
+
+#endif

@@ -1,16 +1,16 @@
 ASM?=nasm
 ASMFLAGS?=-f elf
 GCC?=/usr/local/i386elfgcc/bin/i386-elf-gcc
-GCCFLAGS?=-ffreestanding -m32 -g
+GCCFLAGS?=-ffreestanding -m32 -g -nostdlib
 LD?=/usr/local/i386elfgcc/bin/i386-elf-ld
 LDFLAGS?=-T linker.ld -melf_i386
 BUILD_DIR?=build
 SRC_DIR?=src
 DIR=kernel
 
-SOURCES_CPP=$(wildcard *.cpp)
+SOURCES_C=$(wildcard *.c)
 SOURCES_ASM=$(wildcard *.asm)
-OBJECTS_CPP=$(patsubst %.cpp, $(BUILD_DIR)/$(DIR)/cpp/%.o, $(SOURCES_CPP))
+OBJECTS_C=$(patsubst %.c, $(BUILD_DIR)/$(DIR)/c/%.o, $(SOURCES_C))
 OBJECTS_ASM=$(patsubst %.asm, $(BUILD_DIR)/$(DIR)/asm/%.o, $(SOURCES_ASM))
 
 .PHONY: all clean
@@ -19,10 +19,10 @@ all: kernel
 
 kernel: $(BUILD_DIR)/$(DIR)/kernel.bin 
 
-$(BUILD_DIR)/$(DIR)/kernel.bin: $(OBJECTS_CPP) $(OBJECTS_ASM) 
-	$(LD) $(LDFLAGS) -o $(BUILD_DIR)/$(DIR)/kernel.bin $(OBJECTS_CPP) $(OBJECTS_ASM)
+$(BUILD_DIR)/$(DIR)/kernel.bin: $(OBJECTS_C) $(OBJECTS_ASM) 
+	$(LD) $(LDFLAGS) -o $(BUILD_DIR)/$(DIR)/kernel.bin $(OBJECTS_C) $(OBJECTS_ASM)
 
-$(BUILD_DIR)/$(DIR)/cpp/%.o: %.cpp always
+$(BUILD_DIR)/$(DIR)/c/%.o: %.c always
 	$(GCC) $(GCCFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/$(DIR)/asm/%.o: %.asm always
@@ -30,7 +30,7 @@ $(BUILD_DIR)/$(DIR)/asm/%.o: %.asm always
 
 
 always:
-	mkdir -p $(BUILD_DIR)/$(DIR)/cpp
+	mkdir -p $(BUILD_DIR)/$(DIR)/c
 	mkdir -p $(BUILD_DIR)/$(DIR)/asm
 
 clearn:
