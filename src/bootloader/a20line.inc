@@ -2,6 +2,7 @@
 ; Enable A20 line
 ;
 ENABLE_A20LINE:
+    bits 16
     ; Disable keyboard
     CALL A20INPUTWAIT
     MOV AL, KBD_DISABLE
@@ -35,11 +36,13 @@ ENABLE_A20LINE:
     RET
 
 A20INPUTWAIT:
+    bits 16
     IN AL, KBD_CMND_PORT
     TEST AL, 2
     JNZ A20INPUTWAIT
     RET
 A20OUTPUTWAIT:
+    bits 16
     IN AL, KBD_DATA_PORT
     TEST AL, 1
     JNZ A20OUTPUTWAIT

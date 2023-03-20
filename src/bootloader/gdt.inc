@@ -2,6 +2,7 @@
 ; Load GDT
 ;
 LOAD_GDT:
+    bits 16
     LGDT [GDT_DESC]
     RET
 

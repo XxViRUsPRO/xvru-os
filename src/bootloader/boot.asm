@@ -1,7 +1,7 @@
 org 0x7C00
 
-bits 16
 _main16:
+    bits 16
     MOV [BOOT_DISK], DL
 
     MOV AX, 0
@@ -40,8 +40,8 @@ _main16:
 ;
 ; 32BIT PROTECTED MODE
 ;
-bits 32
 START_PROTECTED:
+    bits 32
     CLI
     MOV AX, DATA_SEG
     MOV DS, AX
