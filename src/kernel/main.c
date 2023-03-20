@@ -13,7 +13,7 @@ void _main32(void)
     {
         char buffer[100];
         itoa(count++, buffer, 10);
-        write_text(buffer, (MAX_COLS) * (MAX_ROWS - 1) + 9, 0x02);
+        write_text(buffer, (MAX_COLS) * (MAX_ROWS - 1) + 9, 0x03);
         sleep(1000000);
     }
 

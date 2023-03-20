@@ -4,13 +4,12 @@ bits 16
 _main16:
     MOV [BOOT_DISK], DL
 
-    CLI
     MOV AX, 0
     MOV DS, AX
     MOV ES, AX
     MOV SS, AX
     MOV SP, 0x7C00
-    STI
+
 
     ; READ FIRST 50 SECTOR AT KERNEL LOCATION
     MOV BX, KERNEL_LOC
@@ -25,14 +24,17 @@ _main16:
     MOV DL, [BOOT_DISK]
     INT 0x13
 
+    
     ; HERE MAKE THE JUMP TO 32BIT
     CLI
-    LGDT [GDT_DESC]
+    CALL ENABLE_A20LINE ; Enbale A20 Line
+    CALL LOAD_GDT ; Load GDT
     MOV EAX, CR0
     OR EAX, 0x1
     MOV CR0, EAX
     JMP CODE_SEG:START_PROTECTED
 
+%include "a20line.inc"
 %include "gdt.inc"
 
 ;
