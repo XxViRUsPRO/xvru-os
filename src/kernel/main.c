@@ -2,9 +2,11 @@
 #include "display.h"
 #include "string.h"
 #include "magic.h"
+#include <arch/i386/hal.h>
 
 void _main32(void)
 {
+    test();
     setup_text();
     write_text("Hello and welcome to XVRU OS!", 0, 0x02);
     write_text("Counter: ", (MAX_COLS) * (MAX_ROWS - 1), 0x02);
