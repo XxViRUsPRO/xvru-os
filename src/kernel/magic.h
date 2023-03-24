@@ -1,6 +1,6 @@
 #ifndef _MAGIC_H_
 #define _MAGIC_H_
-#include "types.h"
+#include <types.h>
 
 #define CDECL __attribute__((cdecl))
 #define PACKED __attribute__((packed))

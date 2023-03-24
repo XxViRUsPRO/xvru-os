@@ -1,7 +1,7 @@
 #ifndef _DISPLAY_H_
 #define _DISPLAY_H_
 
-#include "types.h"
+#include <types.h>
 
 #define VIDEO_ADDRESS 0xb8000
 #define MAX_ROWS 25

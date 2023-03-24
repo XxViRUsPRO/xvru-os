@@ -8,6 +8,16 @@ size_t strlen(const char *s)
     return len;
 }
 
+char *strcat(char *dest, const char *src)
+{
+    size_t dest_len = strlen(dest);
+    size_t i;
+    for (i = 0; src[i] != '\0'; i++)
+        dest[dest_len + i] = src[i];
+    dest[dest_len + i] = '\0';
+    return dest;
+}
+
 char *itoa(int value, char *buffer, int base)
 {
     char *p = buffer;
