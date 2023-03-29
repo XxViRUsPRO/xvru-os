@@ -1,7 +1,6 @@
 #include "isr.h"
 #include "idt.h"
 #include "gdt.h"
-#include <display.h>
 #include <string.h>
 
 #pragma region Interrupt Service Routines Forward Declarations
@@ -532,10 +531,6 @@ void ISR_init(void)
 
 void __attribute__((cdecl)) ISR_handler(Registers *registers)
 {
-    char message[256] = "Interrupt: ";
-    char code[16];
-    itoa(registers->int_no, code, 10);
-    strcat(message, code);
-    write_text(message, (80 * 25) - 14, 0x04);
+    // TODO: Implement ISR handler
     return;
 }

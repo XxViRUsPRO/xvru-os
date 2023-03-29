@@ -1,4 +1,5 @@
 #include "string.h"
+#include "math.h"
 
 size_t strlen(const char *s)
 {
@@ -6,6 +7,15 @@ size_t strlen(const char *s)
     while (s[len])
         len++;
     return len;
+}
+
+int strcpy(char *dest, const char *src)
+{
+    size_t i;
+    for (i = 0; src[i] != '\0'; i++)
+        dest[i] = src[i];
+    dest[i] = '\0';
+    return i;
 }
 
 char *strcat(char *dest, const char *src)
@@ -18,7 +28,7 @@ char *strcat(char *dest, const char *src)
     return dest;
 }
 
-char *itoa(int value, char *buffer, int base)
+int itoa(int value, char *buffer, int base)
 {
     char *p = buffer;
     char *p1, *p2;
@@ -58,5 +68,31 @@ char *itoa(int value, char *buffer, int base)
         p2--;
     }
 
-    return buffer;
+    return p - buffer;
+}
+
+int ftoa(float value, char *buffer, int afterpoint)
+{
+    // Extract integer part
+    int ipart = (int)value;
+
+    // Extract floating part
+    float fpart = value - (float)ipart;
+
+    // convert integer part to string
+    int i = itoa(ipart, buffer, 10);
+
+    // check for display option after point
+    if (afterpoint != 0)
+    {
+        buffer[i] = '.'; // add dot
+
+        // Get the value of fraction part upto given no.
+        // of points after dot. The third parameter
+        // is needed to handle cases like 233.007
+        fpart = fpart * pow(10, afterpoint);
+
+        itoa((int)fpart, buffer + i + 1, 10);
+    }
+    return i;
 }
