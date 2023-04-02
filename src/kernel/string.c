@@ -92,7 +92,7 @@ int ftoa(float value, char *buffer, int afterpoint)
         // is needed to handle cases like 233.007
         fpart = fpart * pow(10, afterpoint);
 
-        itoa((int)fpart, buffer + i + 1, 10);
+        i += itoa((int)fpart, buffer + i + 1, 10) + (afterpoint - 1);
     }
     return i;
 }
