@@ -4,10 +4,6 @@
 void draw_pixel(vec2d v, enum vga_color color)
 {
     vec2d p = to_screen_space(v);
-    if (p.x < 0 || p.x > MAX_X || p.y < 0 || p.y > MAX_Y)
-    {
-        return;
-    }
     vga_buffer[p.y][p.x] = color;
 }
 
@@ -48,12 +44,13 @@ void draw_line(vec2d v1, vec2d v2, enum vga_color color)
     }
 }
 
-void refresh_screen()
+void render()
 {
-    for (u16 y = 0; y < MAX_Y; y++)
+    // TODO: We can optimize this by only rendering the pixels that have changed since the last render by using changes queue
+    for (u16 y = 0; y < SCREEN_H; y++)
     {
-        u16 i = y * MAX_X;
-        for (u16 x = 0; x < MAX_X; x++)
+        u16 i = y * SCREEN_W;
+        for (u16 x = 0; x < SCREEN_W; x++)
         {
             vga_memory[i + x] = vga_buffer[y][x];
         }
@@ -62,7 +59,7 @@ void refresh_screen()
 
 vec2d to_screen_space(vec2d p)
 {
-    return (vec2d){p.x + MAX_X / 2, MAX_Y / 2 - p.y};
+    return (vec2d){(i32)abs(p.x + MAX_X) % SCREEN_W, (i32)abs(MAX_Y - p.y) % SCREEN_H};
 }
 
 /**
@@ -72,7 +69,7 @@ vec2d to_screen_space(vec2d p)
  * @param direction The direction of the ray
  * @param center The center of the circle
  * @param radius The radius of the circle
- * @return vec2d The intersection point | (MAX_INT, MIN_INT) if there is no intersection
+ * @return vec2d The nearst intersection point | (MAX_INT, MIN_INT) if there is no intersection
  */
 vec2d intersect_circle(vec2d origin, vec2d direction, vec2d center, f32 radius)
 {

@@ -36,5 +36,7 @@ f64 sin(f64 x);
 f64 tan(f64 x);
 f64 acos(f64 x);
 f64 asin(f64 x);
+f64 atan(f64 x);
+f64 atan2(f64 y, f64 x);
 
 #endif

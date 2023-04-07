@@ -15,46 +15,35 @@ typedef struct
 void _main32(void)
 {
     HAL_init();
-    vec2d origin = {0, 0};
-    i32 radius = 20;
+    vec2d center = {-10, -10};
+    vec2d center2 = {0, 0};
+    vec2d center3 = {10, 10};
+    i32 radius = 50;
 
-    // Draw circle
-    for (i32 x = -radius; x <= radius; x++)
+    // Draw a circle
+    for (i32 o = 0; o < 360; o++)
     {
-        for (i32 y = -radius; y <= radius; y++)
-        {
-            if (x * x + y * y <= radius * radius)
-            {
-                draw_pixel((vec2d){x, y}, LIGHT_BLUE);
-            }
-        }
+        vec2d p = {
+            (i32)(center.x + radius * cos(o)),
+            (i32)(center.y + radius * sin(o))};
+        draw_pixel(p, WHITE);
+    }
+    for (i32 o = 0; o < 360; o++)
+    {
+        vec2d p = {
+            (i32)(center2.x + radius * cos(o)),
+            (i32)(center2.y + radius * sin(o))};
+        draw_pixel(p, RED);
+    }
+    for (i32 o = 0; o < 360; o++)
+    {
+        vec2d p = {
+            (i32)(center3.x + radius * cos(o)),
+            (i32)(center3.y + radius * sin(o))};
+        draw_pixel(p, GREEN);
     }
 
-    ray r[] = {
-        {{0, 0}, {1, 0}},
-        {{0, 0}, {1, 1}},
-        {{0, 0}, {0, 1}},
-        {{0, 0}, {-1, 1}},
-        {{0, 0}, {-1, 0}},
-        {{0, 0}, {-1, -1}},
-        {{0, 0}, {0, -1}},
-        {{0, 0}, {1, -1}},
-    };
-
-    for (u32 i = 0; i < sizeof(r) / sizeof(ray); i++)
-    {
-        vec2d p = intersect_circle(r[i].o, r[i].d, origin, radius);
-        // draw a 2x2 pixel square
-        if (p.x != MAX_INT && p.y != MIN_INT)
-        {
-            draw_pixel(p, RED);
-            draw_pixel((vec2d){p.x + 1, p.y}, RED);
-            draw_pixel((vec2d){p.x, p.y + 1}, RED);
-            draw_pixel((vec2d){p.x + 1, p.y + 1}, RED);
-        }
-    }
-
-    refresh_screen();
+    render();
 
     // Infinite loop to prevent the kernel from exiting
     while (1)

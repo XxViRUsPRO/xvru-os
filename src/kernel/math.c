@@ -101,3 +101,24 @@ f64 asin(f64 x)
 {
     return acos(x) - PI / 2.0;
 }
+
+f64 atan(f64 x)
+{
+    return asin(x / isqrt(1 + x * x));
+}
+
+f64 atan2(f64 y, f64 x)
+{
+    if (x > 0)
+        return atan(y / x);
+    else if (x < 0 && y >= 0)
+        return atan(y / x) + PI;
+    else if (x < 0 && y < 0)
+        return atan(y / x) - PI;
+    else if (x == 0 && y > 0)
+        return PI / 2.0;
+    else if (x == 0 && y < 0)
+        return -PI / 2.0;
+    else
+        return 0;
+}
