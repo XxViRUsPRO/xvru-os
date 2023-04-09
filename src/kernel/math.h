@@ -31,6 +31,7 @@ i64 floor(f64 x);
 i64 pow(i64 x, i64 y);
 f64 log(f64 x);
 i32 isqrt(f64 x);
+f64 sqrt(f64 x);
 f64 cos(f64 x);
 f64 sin(f64 x);
 f64 tan(f64 x);
