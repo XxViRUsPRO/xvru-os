@@ -1,5 +1,5 @@
-#ifndef _DISPLAY_H_
-#define _DISPLAY_H_
+#ifndef DISPLAY_H
+#define DISPLAY_H
 #include <types.h>
 #include <math.h>
 
@@ -45,12 +45,12 @@ typedef struct
 typedef struct
 {
     vec3d p[3];
-} triangle;
+} triangle_t;
 
 typedef struct
 {
-    triangle t[12];
-} cube_mesh;
+    triangle_t t[12];
+} mesh_t;
 
 typedef struct
 {
@@ -59,11 +59,10 @@ typedef struct
 
 void draw_pixel(vec2d p, u8 color);
 void draw_line(vec2d v1, vec2d v2, u8 color);
-void draw_triangle(triangle *t, u8 color);
-void fill_triangle(triangle *t, u8 color);
+void draw_triangle(triangle_t *t, u32 size, u8 color);
+void fill_triangle(triangle_t *t, u32 size, u8 color);
 void clear_vga_buffer();
 void render();
 vec2d to_screen_space(vec2d p);
-vec2d intersection(vec2d origin, vec2d direction, vec2d center, f32 radius);
 
 #endif

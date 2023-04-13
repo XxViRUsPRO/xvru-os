@@ -1,5 +1,5 @@
-#ifndef _STDIO_H_
-#define _STDIO_H_
+#ifndef STDIO_H
+#define STDIO_H
 #include <types.h>
 
 #define VIDEO_ADDRESS 0xb8000

@@ -1,5 +1,5 @@
-#include "display.h"
-#include "memory.h"
+#include <display.h>
+#include <string.h>
 
 void draw_pixel(vec2d v, u8 color)
 {
@@ -35,18 +35,18 @@ void draw_line(vec2d v1, vec2d v2, u8 color)
     }
 }
 
-void draw_triangle(triangle *t, u8 color)
+void draw_triangle(triangle_t *t, u32 size, u8 color)
 {
-    draw_line((vec2d){t->p[0].x * 100, t->p[0].y * 100}, (vec2d){t->p[1].x * 100, t->p[1].y * 100}, color);
-    draw_line((vec2d){t->p[1].x * 100, t->p[1].y * 100}, (vec2d){t->p[2].x * 100, t->p[2].y * 100}, color);
-    draw_line((vec2d){t->p[2].x * 100, t->p[2].y * 100}, (vec2d){t->p[0].x * 100, t->p[0].y * 100}, color);
+    draw_line((vec2d){t->p[0].x * size, t->p[0].y * size}, (vec2d){t->p[1].x * size, t->p[1].y * size}, color);
+    draw_line((vec2d){t->p[1].x * size, t->p[1].y * size}, (vec2d){t->p[2].x * size, t->p[2].y * size}, color);
+    draw_line((vec2d){t->p[2].x * size, t->p[2].y * size}, (vec2d){t->p[0].x * size, t->p[0].y * size}, color);
 }
 
-void fill_triangle(triangle *t, u8 color)
+void fill_triangle(triangle_t *t, u32 size, u8 color)
 {
-    vec2d p1 = (vec2d){t->p[0].x * 100, t->p[0].y * 100};
-    vec2d p2 = (vec2d){t->p[1].x * 100, t->p[1].y * 100};
-    vec2d p3 = (vec2d){t->p[2].x * 100, t->p[2].y * 100};
+    vec2d p1 = (vec2d){t->p[0].x * size, t->p[0].y * size};
+    vec2d p2 = (vec2d){t->p[1].x * size, t->p[1].y * size};
+    vec2d p3 = (vec2d){t->p[2].x * size, t->p[2].y * size};
 
     vec2d min = (vec2d){MIN(MIN(p1.x, p2.x), p3.x), MIN(MIN(p1.y, p2.y), p3.y)};
     vec2d max = (vec2d){MAX(MAX(p1.x, p2.x), p3.x), MAX(MAX(p1.y, p2.y), p3.y)};
@@ -80,30 +80,5 @@ void render()
 
 vec2d to_screen_space(vec2d p)
 {
-    return (vec2d){(i32)abs(p.x + MAX_X) % SCREEN_W, (i32)abs(MAX_Y - p.y) % SCREEN_H};
-}
-
-/**
- * @brief Calculate the intersection of a ray with a circle
- *
- * @param origin The origin of the ray
- * @param direction The direction of the ray
- * @param center The center of the circle
- * @param radius The radius of the circle
- * @return vec2d The nearst intersection point | (MAX_INT, MIN_INT) if there is no intersection
- */
-vec2d intersection(vec2d origin, vec2d direction, vec2d center, f32 radius)
-{
-    i32 a = direction.x * direction.x + direction.y * direction.y;
-    i32 b = 2 * (direction.x * (origin.x - center.x) + direction.y * (origin.y - center.y));
-    i32 c = (origin.x - center.x) * (origin.x - center.x) + (origin.y - center.y) * (origin.y - center.y) - radius * radius;
-    i32 discriminant = b * b - 4 * a * c;
-    if (discriminant < 0)
-    {
-        return (vec2d){NAN, NAN};
-    }
-    f32 t1 = (-b + sqrt(discriminant)) / (2 * a);
-    f32 t2 = (-b - sqrt(discriminant)) / (2 * a);
-    f32 t = MIN(t1, t2);
-    return (vec2d){origin.x + direction.x * t, origin.y + direction.y * t};
+    return (vec2d){p.x + SCREEN_W / 2, SCREEN_H / 2 - p.y};
 }

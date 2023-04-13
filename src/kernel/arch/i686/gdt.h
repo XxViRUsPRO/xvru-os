@@ -1,5 +1,5 @@
-#ifndef _GDT_H_
-#define _GDT_H_
+#ifndef GDT_H
+#define GDT_H
 #include <types.h>
 
 #define GDT_CODE_SEG 0x08

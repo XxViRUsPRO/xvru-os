@@ -3,8 +3,11 @@
 #include "gdt.h"
 #include <string.h>
 #include <stdio.h>
+#include <magic.h>
 
-static const char* EXCEPTIONS[] = {
+ISR_handler_t ISR_handlers[256];
+
+static const char *EXCEPTIONS[] = {
     "Divide by zero error",
     "Debug",
     "Non-maskable Interrupt",
@@ -36,8 +39,7 @@ static const char* EXCEPTIONS[] = {
     "Hypervisor Injection Exception",
     "VMM Communication Exception",
     "Security Exception",
-    ""
-};
+    ""};
 
 #pragma region Interrupt Service Routines Forward Declarations
 void __attribute__((cdecl)) ISR0(void);
@@ -563,17 +565,35 @@ void ISR_init(void)
     {
         IDT_enable_gate(interrupt);
     }
+    IDT_disable_gate(0x80);
 }
 
-void __attribute__((cdecl)) ISR_handler(Registers *registers)
+void __attribute__((cdecl)) ISR_handler(Registers *regs)
 {
-    if (EXCEPTIONS[registers->int_no] != 0)
-    {
-        printf("Exception: %s\n", EXCEPTIONS[registers->int_no]);
-    }
+    if (ISR_handlers[regs->int_no] != NULL)
+        ISR_handlers[regs->int_no](regs);
+
+    else if (regs->int_no >= 32)
+        printf("Unhandled interrupt %d!\n", regs->int_no);
+
     else
     {
-        printf("Unhandled interrupt: %d\n", registers->int_no);
+        printf("Unhandled exception %d %s\n", regs->int_no, EXCEPTIONS[regs->int_no]);
+
+        printf("  eax=%x  ebx=%x  ecx=%x  edx=%x  esi=%x  edi=%x\n",
+               regs->eax, regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi);
+
+        printf("  esp=%x  ebp=%x  eip=%x  eflags=%x  cs=%x  ds=%x  ss=%x\n",
+               regs->esp, regs->ebp, regs->eip, regs->eflags, regs->cs, regs->ds, regs->ss);
+
+        printf("  interrupt=%x  errorcode=%x\n", regs->int_no, regs->err_code);
+
+        printf("KERNEL PANIC!\n");
+        panic();
     }
-    return;
+}
+
+void ISR_install(u8 int_no, ISR_handler_t handler)
+{
+    ISR_handlers[int_no] = handler;
 }

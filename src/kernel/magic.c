@@ -1,8 +1,8 @@
 #include "magic.h"
 
-void sleep(u32 ms)
+#define UNUSED_PORT 0x80
+
+void io_wait()
 {
-    counter = ms;
-    while (counter-- > 0)
-        ;
+    outb(UNUSED_PORT, 0);
 }

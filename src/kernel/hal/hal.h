@@ -1,5 +1,5 @@
-#ifndef _HAL_H_
-#define _HAL_H_
+#ifndef HAL_H
+#define HAL_H
 
 void HAL_init(void);
 
