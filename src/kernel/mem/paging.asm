@@ -1,6 +1,7 @@
 ;
 ; Enable Paging
 ;
+global enablePaging
 enablePaging:
     bits 32
     ; load page directory (eax has the address of the page directory) 

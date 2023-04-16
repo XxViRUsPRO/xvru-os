@@ -13,7 +13,7 @@ extern void enablePaging(u32 *);
 u32 page_directory[NUM_PAGES] __attribute__((aligned(PAGE_FRAME_SIZE)));
 u32 page_table[NUM_PAGES] __attribute__((aligned(PAGE_FRAME_SIZE)));
 
-void init_paging()
+void paging_init()
 {
     i32 i;
 

@@ -1,6 +1,6 @@
 #include "kheap.h"
 
-extern KERNEL_END;
+extern u32 KERNEL_END;
 u32 mem_addr = (u32)&KERNEL_END;
 
 u32 kmalloc(u32 size)

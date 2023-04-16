@@ -10,6 +10,19 @@ _main16:
     MOV SS, AX
     MOV SP, 0x7C00
 
+    ; PRINT WELCOME MESSAGE
+    MOV AH, 0x0E
+    MOV SI, WELCOME_MSG
+    MOV BH, 0x00
+    MOV BL, 0x0F
+    .loop:
+        LODSB
+        OR AL, AL
+        JZ .end
+        INT 0x10
+        JMP .loop
+    .end:
+
     ; SETUP VIDEO MODE
     ; MOV AX, 0x0013
     ; INT 0x10
@@ -63,11 +76,12 @@ START_PROTECTED:
 ;   GLOBAL VARIABLES
 ;
 BOOT_DISK: DB 0x00
+WELCOME_MSG: DB "WELCOME TO XVRU OS!", 0x0D, 0x0A, 0x00
 
 ;
 ;   CONSTANTS
 ;
-KERNEL_ADDR EQU 0x00000500
+KERNEL_ADDR EQU 0xC0100000
 
 TIMES 510-($-$$) DB 0
 DW 0xAA55

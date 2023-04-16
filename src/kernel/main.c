@@ -6,6 +6,7 @@
 #include <hal/hal.h>
 #include <types.h>
 #include <drivers/timer.h>
+#include <mem/paging.h>
 #include "vector.h"
 
 void multiply_matrix_vector(vec3d i, vec3d *o, mat4x4 m)
@@ -29,6 +30,7 @@ void _main32(void)
 {
     HAL_init();
     timer_init();
+    paging_init();
 
     clear_screen();
     f32 time = 0.0f;
