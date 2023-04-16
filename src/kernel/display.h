@@ -57,6 +57,9 @@ typedef struct
     f32 m[4][4];
 } mat4x4;
 
+#define VEC2D(x, y) ((vec2d){x, y})
+#define VEC3D(x, y, z) ((vec3d){x, y, z})
+
 void draw_pixel(vec2d p, u8 color);
 void draw_line(vec2d v1, vec2d v2, u8 color);
 void draw_triangle(triangle_t *t, u32 size, u8 color);

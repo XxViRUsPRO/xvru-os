@@ -31,11 +31,12 @@ void _main32(void)
     timer_init();
 
     clear_screen();
-
-    for (u32 i = 0; i < 100; i++)
+    f32 time = 0.0f;
+    while (1)
     {
-        printf("Hello World! %d\r\n", i);
-        sleep(1000);
+        printf("Hello World! %f\r\n", time);
+        time += 0.1f;
+        sleep(100);
     }
 
     // vect_i32 *v = vect_init_i32(VECT_CAPACITY);
@@ -52,29 +53,29 @@ void _main32(void)
 
     // mesh_t mesh = {
     //     // South face
-    //     0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-    //     0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+    //     (triangle_t){VEC3D(0.0f, 0.0f, 0.0f), VEC3D(0.0f, 1.0f, 0.0f), VEC3D(1.0f, 1.0f, 0.0f)},
+    //     (triangle_t){VEC3D(0.0f, 0.0f, 0.0f), VEC3D(1.0f, 1.0f, 0.0f), VEC3D(1.0f, 0.0f, 0.0f)},
 
     //     // East face
-    //     1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-    //     1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+    //     (triangle_t){VEC3D(1.0f, 0.0f, 0.0f), VEC3D(1.0f, 1.0f, 0.0f), VEC3D(1.0f, 1.0f, 1.0f)},
+    //     (triangle_t){VEC3D(1.0f, 0.0f, 0.0f), VEC3D(1.0f, 1.0f, 1.0f), VEC3D(1.0f, 0.0f, 1.0f)},
 
     //     // North face
-    //     1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-    //     1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+    //     (triangle_t){VEC3D(1.0f, 0.0f, 1.0f), VEC3D(1.0f, 1.0f, 1.0f), VEC3D(0.0f, 1.0f, 1.0f)},
+    //     (triangle_t){VEC3D(1.0f, 0.0f, 1.0f), VEC3D(0.0f, 1.0f, 1.0f), VEC3D(0.0f, 0.0f, 1.0f)},
 
     //     // West face
-    //     0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-    //     0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    //     (triangle_t){VEC3D(0.0f, 0.0f, 1.0f), VEC3D(0.0f, 1.0f, 1.0f), VEC3D(0.0f, 1.0f, 0.0f)},
+    //     (triangle_t){VEC3D(0.0f, 0.0f, 1.0f), VEC3D(0.0f, 1.0f, 0.0f), VEC3D(0.0f, 0.0f, 0.0f)},
 
     //     // Top face
-    //     0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-    //     0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+    //     (triangle_t){VEC3D(0.0f, 1.0f, 0.0f), VEC3D(0.0f, 1.0f, 1.0f), VEC3D(1.0f, 1.0f, 1.0f)},
+    //     (triangle_t){VEC3D(0.0f, 1.0f, 0.0f), VEC3D(1.0f, 1.0f, 1.0f), VEC3D(1.0f, 1.0f, 0.0f)},
 
     //     // Bottom face
-    //     1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-    //     1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
-
+    //     (triangle_t){VEC3D(1.0f, 0.0f, 1.0f), VEC3D(0.0f, 0.0f, 1.0f), VEC3D(0.0f, 0.0f, 0.0f)},
+    //     (triangle_t){VEC3D(1.0f, 0.0f, 1.0f), VEC3D(0.0f, 0.0f, 0.0f), VEC3D(1.0f, 0.0f, 0.0f)},
+    // };
     // vec3d vCamera = {0.0f, 0.0f, 0.0f};
 
     // mat4x4 matProj;
@@ -96,8 +97,6 @@ void _main32(void)
     // f32 time_elapsed = 0.0f;
     // while (1)
     // {
-    //     clear_vga_buffer();
-
     //     f32 fTheta = time_elapsed;
     //     // Rotation Z Matrix
     //     matRotZ.m[0][0] = cos(fTheta);
@@ -111,78 +110,80 @@ void _main32(void)
     //     matRotX.m[0][0] = 1.0f;
     //     matRotX.m[1][1] = cos(fTheta * 0.5f);
     //     matRotX.m[1][2] = sin(fTheta * 0.5f);
-    //     matRotX.m[2][1] = -sin(fTheta * 0.5f);
-    //     matRotX.m[2][2] = cos(fTheta * 0.5f);
-    //     matRotX.m[3][3] = 1.0f;
+    // matRotX.m[2][1] = -matRotX.m[1][2];
+    // matRotX.m[2][2] = cos(fTheta * 0.5f);
+    // matRotX.m[3][3] = 1.0f;
 
-    //     for (int i = 0; i < 12; i++)
+    // for (int i = 0; i < 12; i++)
+    // {
+    //     triangle_t t, triProjected, triTranslated, triRotatedZ, triRotatedZX;
+    //     t = mesh.t[i];
+
+    //     // Rotate in Z-Axis
+    //     multiply_matrix_vector(t.p[0], &triRotatedZ.p[0], matRotZ);
+    //     multiply_matrix_vector(t.p[1], &triRotatedZ.p[1], matRotZ);
+    //     multiply_matrix_vector(t.p[2], &triRotatedZ.p[2], matRotZ);
+
+    //     // Rotate in X-Axis
+    //     multiply_matrix_vector(triRotatedZ.p[0], &triRotatedZX.p[0], matRotX);
+    //     multiply_matrix_vector(triRotatedZ.p[1], &triRotatedZX.p[1], matRotX);
+    //     multiply_matrix_vector(triRotatedZ.p[2], &triRotatedZX.p[2], matRotX);
+
+    //     // Offset into the screen
+    //     triTranslated = triRotatedZX;
+    //     triTranslated.p[0].z = triRotatedZX.p[0].z + 2.5f;
+    //     triTranslated.p[1].z = triRotatedZX.p[1].z + 2.5f;
+    //     triTranslated.p[2].z = triRotatedZX.p[2].z + 2.5f;
+
+    //     // Compute triangle normal
+    //     vec3d normal, line1, line2;
+    //     line1.x = triTranslated.p[1].x - triTranslated.p[0].x;
+    //     line1.y = triTranslated.p[1].y - triTranslated.p[0].y;
+    //     line1.z = triTranslated.p[1].z - triTranslated.p[0].z;
+
+    //     line2.x = triTranslated.p[2].x - triTranslated.p[0].x;
+    //     line2.y = triTranslated.p[2].y - triTranslated.p[0].y;
+    //     line2.z = triTranslated.p[2].z - triTranslated.p[0].z;
+
+    //     normal.x = line1.y * line2.z - line1.z * line2.y;
+    //     normal.y = line1.z * line2.x - line1.x * line2.z;
+    //     normal.z = line1.x * line2.y - line1.y * line2.x;
+
+    //     // Normalize
+    //     f32 l = sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+    //     normal.x /= l;
+    //     normal.y /= l;
+    //     normal.z /= l;
+
+    //     if (normal.x * (triTranslated.p[0].x - vCamera.x) + normal.y * (triTranslated.p[0].y - vCamera.y) + normal.z * (triTranslated.p[0].z - vCamera.z) < 0.0f)
     //     {
-    //         triangle_t t, triProjected, triTranslated, triRotatedZ, triRotatedZX;
-    //         t = mesh.t[i];
+    //         // Illumination
+    //         vec3d light_direction = {0.0f, 0.0f, -1.0f};
+    //         f32 l = sqrt(light_direction.x * light_direction.x + light_direction.y * light_direction.y + light_direction.z * light_direction.z);
+    //         light_direction.x /= l;
+    //         light_direction.y /= l;
+    //         light_direction.z /= l;
 
-    //         // Rotate in Z-Axis
-    //         multiply_matrix_vector(t.p[0], &triRotatedZ.p[0], matRotZ);
-    //         multiply_matrix_vector(t.p[1], &triRotatedZ.p[1], matRotZ);
-    //         multiply_matrix_vector(t.p[2], &triRotatedZ.p[2], matRotZ);
+    //         f32 dp = MAX(0.1f, normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z);
 
-    //         // Rotate in X-Axis
-    //         multiply_matrix_vector(triRotatedZ.p[0], &triRotatedZX.p[0], matRotX);
-    //         multiply_matrix_vector(triRotatedZ.p[1], &triRotatedZX.p[1], matRotX);
-    //         multiply_matrix_vector(triRotatedZ.p[2], &triRotatedZX.p[2], matRotX);
+    //         u8 color = (u8)(dp * 15.0f);
 
-    //         // Offset into the screen
-    //         triTranslated = triRotatedZX;
-    //         triTranslated.p[0].z = triRotatedZX.p[0].z + 2.5f;
-    //         triTranslated.p[1].z = triRotatedZX.p[1].z + 2.5f;
-    //         triTranslated.p[2].z = triRotatedZX.p[2].z + 2.5f;
+    //         // Project triangles from 3D --> 2D
+    //         multiply_matrix_vector(triTranslated.p[0], &triProjected.p[0], matProj);
+    //         multiply_matrix_vector(triTranslated.p[1], &triProjected.p[1], matProj);
+    //         multiply_matrix_vector(triTranslated.p[2], &triProjected.p[2], matProj);
 
-    //         // Compute triangle normal
-    //         vec3d normal, line1, line2;
-    //         line1.x = triTranslated.p[1].x - triTranslated.p[0].x;
-    //         line1.y = triTranslated.p[1].y - triTranslated.p[0].y;
-    //         line1.z = triTranslated.p[1].z - triTranslated.p[0].z;
-
-    //         line2.x = triTranslated.p[2].x - triTranslated.p[0].x;
-    //         line2.y = triTranslated.p[2].y - triTranslated.p[0].y;
-    //         line2.z = triTranslated.p[2].z - triTranslated.p[0].z;
-
-    //         normal.x = line1.y * line2.z - line1.z * line2.y;
-    //         normal.y = line1.z * line2.x - line1.x * line2.z;
-    //         normal.z = line1.x * line2.y - line1.y * line2.x;
-
-    //         // Normalize
-    //         f32 l = sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
-    //         normal.x /= l;
-    //         normal.y /= l;
-    //         normal.z /= l;
-
-    //         if (normal.x * (triTranslated.p[0].x - vCamera.x) + normal.y * (triTranslated.p[0].y - vCamera.y) + normal.z * (triTranslated.p[0].z - vCamera.z) < 0.0f)
-    //         {
-    //             // Illumination
-    //             vec3d light_direction = {0.0f, 0.0f, -1.0f};
-    //             f32 l = sqrt(light_direction.x * light_direction.x + light_direction.y * light_direction.y + light_direction.z * light_direction.z);
-    //             light_direction.x /= l;
-    //             light_direction.y /= l;
-    //             light_direction.z /= l;
-
-    //             f32 dp = MAX(0.1f, normal.x * light_direction.x + normal.y * light_direction.y + normal.z * light_direction.z);
-
-    //             u8 color = (u8)(dp * 15.0f);
-
-    //             // Project triangles from 3D --> 2D
-    //             multiply_matrix_vector(triTranslated.p[0], &triProjected.p[0], matProj);
-    //             multiply_matrix_vector(triTranslated.p[1], &triProjected.p[1], matProj);
-    //             multiply_matrix_vector(triTranslated.p[2], &triProjected.p[2], matProj);
-
-    //             fill_triangle(&triProjected, 100, color);
-    //         }
+    //         fill_triangle(&triProjected, 100, color);
     //     }
-
-    //     render();
-    //     time_elapsed += 0.01f;
     // }
 
-    // render();
+    //     draw_line(VEC2D(0, 0), VEC2D(cos(fTheta) * 100, sin(fTheta) * 100), 15);
+
+    //     render();
+    //     sleep(100);
+    //     time_elapsed += 0.1f;
+    //     clear_vga_buffer();
+    // }
 
     // Infinite loop to prevent the kernel from exiting
     while (1)
