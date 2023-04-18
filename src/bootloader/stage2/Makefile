@@ -1,12 +1,12 @@
 ASM?=nasm
 ASMFLAGS?=-f elf
 GCC?=/usr/local/i386elfgcc/bin/i386-elf-gcc
-GCCFLAGS?=-ffreestanding -m32 -g -nostdlib -I. -I../include
+GCCFLAGS?=-ffreestanding -m32 -g -nostdlib -I. -I../../include
 LD?=/usr/local/i386elfgcc/bin/i386-elf-ld
 LDFLAGS?=-T linker.ld -melf_i386
 BUILD_DIR?=build
 SRC_DIR?=src
-DIR=kernel
+DIR=stage2
 
 SOURCES_C=$(shell find . -type f -name '*.c')
 SOURCES_ASM=$(shell find . -type f -name '*.asm')
@@ -17,12 +17,12 @@ OBJECTS_ASM=$(patsubst %.asm, $(BUILD_DIR)/$(DIR)/asm/%.o, $(SOURCES_ASM))
 
 .PHONY: all clean
 
-all: kernel
+all: stage2
 
-kernel: $(BUILD_DIR)/$(DIR)/kernel.bin
+stage2: $(BUILD_DIR)/$(DIR)/stage2.bin
 
-$(BUILD_DIR)/$(DIR)/kernel.bin: $(OBJECTS_C) $(OBJECTS_ASM)
-	@$(LD) $(LDFLAGS) -o $(BUILD_DIR)/$(DIR)/kernel.bin $(OBJECTS_C) $(OBJECTS_ASM)
+$(BUILD_DIR)/$(DIR)/stage2.bin: $(OBJECTS_C) $(OBJECTS_ASM)
+	@$(LD) $(LDFLAGS) -o $(BUILD_DIR)/$(DIR)/stage2.bin $(OBJECTS_C) $(OBJECTS_ASM)
 
 $(BUILD_DIR)/$(DIR)/c/%.o: %.c $(SOURCES_HEADERS)
 	@echo "Compiling \e[33m\e[4m$<\e[0m..."
