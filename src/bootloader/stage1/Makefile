@@ -1,20 +1,20 @@
 ASM?=nasm
 BUILD_DIR?=build
 SRC_DIR?=src
-DIR=bootloader
+DIR=stage1
 
 MAIN_ASM=boot.asm
 SOURCES_INCLUDES=$(shell find -name '*.inc')
 
 .PHONY: all clean
 
-all: bootloader
+all: stage1
 
-bootloader: $(BUILD_DIR)/$(DIR)/bootloader.bin 
+stage1: $(BUILD_DIR)/$(DIR)/stage1.bin 
 
-$(BUILD_DIR)/$(DIR)/bootloader.bin: $(MAIN_ASM) $(SOURCES_INCLUDES) always
+$(BUILD_DIR)/$(DIR)/stage1.bin: $(MAIN_ASM) $(SOURCES_INCLUDES) always
 	@echo "Assembling \e[33m\e[4m$<\e[0m..."
-	@$(ASM) $(MAIN_ASM) -f bin -o $(BUILD_DIR)/$(DIR)/bootloader.bin
+	@$(ASM) $(MAIN_ASM) -f bin -o $(BUILD_DIR)/$(DIR)/stage1.bin
 	
 
 always:

@@ -25,7 +25,7 @@ void multiply_matrix_vector(vec3d i, vec3d *o, mat4x4 m)
 
 // VECT_GENERATE_NAME(i32, i32);
 
-void _main32(void)
+void kmain(void)
 {
     HAL_init();
     timer_init();
