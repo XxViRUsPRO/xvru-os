@@ -10,9 +10,9 @@ BPB_BytesPerSec: DW 512
 BPB_SecPerClus: DB 1
 BPB_RsvdSecCnt: DW 1
 BPB_NumFATs: DB 2
-BPB_RootEntCnt: DW 0xE0
+BPB_RootEntCnt: DW 0x0E0
 BPB_TotSec16: DW 2880
-BPB_Media: DB 0xF0
+BPB_Media: DB 0x0F0
 BPB_FATSz16: DW 9
 BPB_SecPerTrk: DW 18
 BPB_NumHeads: DW 2
@@ -20,7 +20,7 @@ BPB_HiddSec: DD 0
 BPB_TotSec32: DD 0
 
 ; EXTENDED BOOT RECORD
-EBR_DrvNum: DB 0x80
+EBR_DrvNum: DB 0
 EBR_Reserved1: DB 0
 EBR_BootSig: DB 0x29
 EBR_VolID: DD 0x12345678
@@ -149,11 +149,12 @@ stage1_start:
     JMP .loop2
 .end:
     ; JUMP TO STAGE2
-    MOV DL, [EBR_DrvNum]
-
     MOV AX, STAGE2_LOAD_SEG
     MOV DS, AX
     MOV ES, AX
+
+    ; PASS DATA TO STAGE2 (u8 disk_id)
+    MOV DL, [EBR_DrvNum]
 
     JMP STAGE2_LOAD_SEG:STAGE2_LOAD_OFF
 .not_found:

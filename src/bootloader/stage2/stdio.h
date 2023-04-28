@@ -16,8 +16,6 @@ void putc(char c);
 void puts(const char *str);
 void sprintf(char *str, const char *fmt, ...);
 void printf(const char *fmt, ...);
-
 int itoa(int value, char *buffer, int base);
-int ftoa(float value, char *buffer, int afterpoint);
 
 #endif

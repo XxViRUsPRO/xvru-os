@@ -1,7 +1,6 @@
 #include "stdio.h"
 #include "string.h"
-#include "magic.h"
-#include "math.h"
+#include "x86.h"
 #include <stdarg.h>
 
 void putchar(int x, int y, char c, char color)
@@ -174,7 +173,12 @@ void vsprintf(char *str, const char *fmt, va_list args)
                 break;
             case 'f':
                 // Float
-                i += ftoa(va_arg(args, double), str + i, 2);
+                double f = va_arg(args, double);
+                int ipart = (int)f;
+                double fpart = f - (double)ipart;
+                i += itoa(ipart, str + i, 10);
+                str[i++] = '.';
+                i += itoa((int)(fpart * 1000000), str + i, 10);
                 break;
             }
         }
@@ -223,15 +227,17 @@ int itoa(int value, char *buffer, int base)
     unsigned long ud = value;
     int divisor = 10;
 
-    // If %d is specified and D is minus, put `-' in the head.
-    if (base == 'd' && value < 0)
+    // If base is 10 and value is negative, put a '-' in the buffer.
+    if (base == 10 && value < 0)
     {
         *p++ = '-';
         buffer++;
         ud = -value;
     }
-    else if (base == 'x')
+    else if (base == 16)
+    {
         divisor = 16;
+    }
 
     // Divide UD by DIVISOR until UD == 0.
     do
@@ -257,30 +263,4 @@ int itoa(int value, char *buffer, int base)
     }
 
     return p - buffer;
-}
-
-int ftoa(float value, char *buffer, int afterpoint)
-{
-    // Extract integer part
-    int ipart = (int)value;
-
-    // Extract floating part
-    float fpart = value - (float)ipart;
-
-    // convert integer part to string
-    int i = itoa(ipart, buffer, 10);
-
-    // check for display option after point
-    if (afterpoint != 0)
-    {
-        buffer[i] = '.'; // add dot
-
-        // Get the value of fraction part upto given no.
-        // of points after dot. The third parameter
-        // is needed to handle cases like 233.007
-        fpart = fpart * pow(10, afterpoint);
-
-        i += itoa((int)fpart, buffer + i + 1, 10) + (afterpoint - 1);
-    }
-    return i;
 }

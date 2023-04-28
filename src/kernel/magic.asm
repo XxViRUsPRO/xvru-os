@@ -67,7 +67,7 @@
 
 
 ; Kernel functions
-global outb:
+global outb
 outb:
     bits 32
     MOV DX, [ESP+4]
@@ -75,7 +75,7 @@ outb:
     OUT DX, AL
     RET
 
-global inb:
+global inb
 inb:
     bits 32
     MOV DX, [ESP+4]
@@ -83,7 +83,7 @@ inb:
     IN AL, DX
     RET
 
-global outw:
+global outw
 outw:
     bits 32
     MOV DX, [ESP+4]
@@ -91,7 +91,7 @@ outw:
     OUT DX, AX
     RET
 
-global inw:
+global inw
 inw:
     bits 32
     MOV DX, [ESP+4]
@@ -109,7 +109,7 @@ STI:
     STI
     RET
 
-global panic:
+global panic
 panic:
     CLI
     HLT

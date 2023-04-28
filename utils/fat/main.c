@@ -98,10 +98,17 @@ directory_entry_t *find_file(const char *filename)
     }
     return NULL;
 }
+int ceil(double x)
+{
+    int i = (int)x;
+    if (x > i)
+        return i + 1;
+    return i;
+}
 void print_file_metadata(directory_entry_t *file)
 {
     printf("Name: %s (%x)\n", file->name, file->attributes);
-    printf("Size: %d bytes (%d clusters) (first cluster: %d)\n", file->file_size, file->file_size / g_fat_header.sectors_per_cluster, file->first_cluster_low);
+    printf("Size: %d bytes (%d clusters) (first cluster: %d)\n", file->file_size, ceil((double)file->file_size / (g_fat_header.sectors_per_cluster * g_fat_header.bytes_per_sector)), file->first_cluster_low);
     printf("Creation time: %d:%d:%d\n", file->creation_time >> 11, (file->creation_time >> 5) & 0x3F, (file->creation_time & 0x1F) * 2);
     printf("Creation date: %d/%d/%d\n", (file->creation_date >> 5) & 0xF, file->creation_date & 0x1F, (file->creation_date >> 9) + 1980);
     printf("Last modification time: %d:%d:%d\n", file->last_modification_time >> 11, (file->last_modification_time >> 5) & 0x3F, (file->last_modification_time & 0x1F) * 2);
@@ -111,20 +118,20 @@ void print_file_metadata(directory_entry_t *file)
 bool read_file(FILE *disk, directory_entry_t *file, void *buffer)
 {
     u16 current_cluster = file->first_cluster_low;
-    bool result = true;
+    bool result = false;
 
     do
     {
         u32 lba = g_root_dir_end + (current_cluster - 2) * g_fat_header.sectors_per_cluster;
-        result = result && read_sectors(disk, lba, g_fat_header.sectors_per_cluster, buffer);
+        result = read_sectors(disk, lba, g_fat_header.sectors_per_cluster, buffer);
         buffer += g_fat_header.sectors_per_cluster * g_fat_header.bytes_per_sector;
 
         u32 next_cluster = current_cluster * 3 / 2;
         if (current_cluster % 2)
             current_cluster = (*(u16 *)&g_fat + next_cluster) >> 4;
         else
-            current_cluster = *(u16 *)&g_fat[next_cluster] & 0xFFF;
-    } while (result && current_cluster < 0xFF8);
+            current_cluster = (*(u16 *)&g_fat + next_cluster) & 0x0FFF;
+    } while (!result && current_cluster < 0xFF8);
 
     return result;
 }
@@ -172,26 +179,26 @@ int main(int argc, char **argv)
     }
     print_file_metadata(file);
 
-    void *buffer = malloc(file->file_size + g_fat_header.bytes_per_sector);
-    if (!read_file(disk, file, buffer))
-    {
-        fprintf(stderr, "Error: could not read file %s\n", argv[2]);
-        free(g_fat);
-        free(g_root_dir);
-        free(buffer);
-        return 1;
-    }
-    printf("File contents:\n");
-    for (u32 i = 0; i < file->file_size; i++)
-    {
-        printf("%02X ", ((u8 *)buffer)[i]);
-        if ((i + 1) % 16 == 0)
-            printf("\n");
-    }
-    printf("\n");
+    // void *buffer = malloc(file->file_size + g_fat_header.bytes_per_sector);
+    // if (!read_file(disk, file, buffer))
+    // {
+    //     fprintf(stderr, "Error: could not read file %s\n", argv[2]);
+    //     free(g_fat);
+    //     free(g_root_dir);
+    //     free(buffer);
+    //     return 1;
+    // }
+    // printf("File contents:\n");
+    // for (u32 i = 0; i < file->file_size; i++)
+    // {
+    //     printf("%02X ", ((u8 *)buffer)[i]);
+    //     if ((i + 1) % 16 == 0)
+    //         printf("\n");
+    // }
+    // printf("\n");
 
     free(g_fat);
     free(g_root_dir);
-    free(buffer);
+    // free(buffer);
     return 0;
 }

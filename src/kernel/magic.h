@@ -2,23 +2,21 @@
 #define MAGIC_H
 #include <types.h>
 
-#define CDECL __attribute__((cdecl))
-#define PACKED __attribute__((packed))
+#define _cdecl __attribute__((cdecl))
 
 #define ASSERT(b) ((b) ? (void)0 : panic_assert(#b, __FILE__, __LINE__, __func__))
 #define UNUSED(x) (void)(x)
 
 static u32 counter = 0;
 
-void CDECL outb(u16 port, u8 value);
-u8 CDECL inb(u16 port);
-void CDECL outw(u16 port, u16 value);
-u16 CDECL inw(u16 port);
+_cdecl void outb(u16 port, u8 value);
+_cdecl u8 inb(u16 port);
+_cdecl void outw(u16 port, u16 value);
+_cdecl u16 inw(u16 port);
 
 void panic(void);
-void CDECL CLI(void);
-void CDECL STI(void);
-
+void CLI(void);
+void STI(void);
 void io_wait();
 
 // Register structs for interrupt/exception
