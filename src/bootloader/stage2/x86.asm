@@ -223,3 +223,173 @@ x86_disk_read_:
     mov esp, ebp
     pop ebp
     ret
+
+; _cdecl void x86_video_init_(u16 mode);
+global x86_video_init_
+x86_video_init_:
+    bits 32
+    push ebp
+    mov ebp, esp
+
+    EnterRealMode
+
+    ; Call Video Mode interrupt
+    mov ax, [bp+8]
+    int 0x10
+
+    EnterProtectedMode
+
+    mov esp, ebp
+    pop ebp
+    ret
+
+; _cdecl u16 x86_vbe_get_info_(void *info);
+global x86_vbe_get_info_
+x86_vbe_get_info_:
+    bits 32
+    push ebp
+    mov ebp, esp
+
+    EnterRealMode
+
+    push es
+    push edi
+    push ebp
+
+    ; Setup args
+    LinearToSegOffset [bp+8], es, edi, di
+
+    ; Call VBE Get Info interrupt
+    mov ax, 0x4F00
+    int 0x10
+
+    pop ebp
+    pop edi
+    pop es
+
+    ; Return
+    push eax
+
+    EnterProtectedMode
+
+    pop eax
+
+    mov esp, ebp
+    pop ebp
+    ret
+
+; _cdecl u16 x86_vbe_get_mode_info_(u16 mode, void *info);
+global x86_vbe_get_mode_info_
+x86_vbe_get_mode_info_:
+    bits 32
+    push ebp
+    mov ebp, esp
+
+    EnterRealMode
+
+    push es
+    push edi
+    push ecx
+    push ebp
+
+    ; Setup args
+    mov cx, [bp+8]
+    LinearToSegOffset [bp+12], es, edi, di
+
+    ; Call VBE Get Mode Info interrupt
+    mov ax, 0x4F01
+    int 0x10
+
+    pop ebp
+    pop ecx
+    pop edi
+    pop es
+
+    ; Return
+    push eax
+
+    EnterProtectedMode
+
+    pop eax
+
+    mov esp, ebp
+    pop ebp
+    ret
+
+; _cdecl void x86_vbe_set_mode_(u16 mode);
+global x86_vbe_set_mode_
+x86_vbe_set_mode_:
+    bits 32
+    push ebp
+    mov ebp, esp
+
+    EnterRealMode
+
+    push es
+    push edi
+    push ebx
+    push ebp
+
+    ; Call VBE Set Mode interrupt
+    mov ax, 0
+    mov es, ax
+    mov edi, 0
+    mov ax, 0x4F02
+    mov bx, [bp+8]
+    int 0x10
+
+    pop ebp
+    pop ebx
+    pop edi
+    pop es
+
+    ; Return
+    push eax
+
+    EnterProtectedMode
+
+    pop eax
+
+    mov esp, ebp
+    pop ebp
+    ret
+
+; _cdecl void x86_vbe_get_mode_(u16 *mode);
+global x86_vbe_get_mode_
+x86_vbe_get_mode_:
+    bits 32
+    push ebp
+    mov ebp, esp
+
+    EnterRealMode
+
+    push es
+    push edi
+    push ebx
+    push ebp
+
+    LinearToSegOffset [bp+8], es, edi, di
+
+    ; Call VBE Get Mode interrupt
+    mov ax, 0x4F03
+    int 0x10
+
+    mov [es:di], bx
+
+    pop ebp
+    pop ebx
+    pop edi
+    pop es
+
+    pop ebp
+
+    ; Return
+    push eax
+
+    EnterProtectedMode
+
+    pop eax
+
+    mov esp, ebp
+    pop ebp
+    ret

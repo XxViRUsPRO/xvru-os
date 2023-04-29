@@ -1,14 +1,52 @@
 #include <display.h>
 #include <string.h>
+#include <font.h>
 
-void draw_pixel(vec2d v, u8 color)
+static u32 vga_buffer_ptr = 0;
+
+void draw_pixel(vec2d v, vec3d color)
 {
     vec2d p = to_screen_space(v);
-    vga_buffer[(i32)p.y][(i32)p.x] = color;
+    if (p.x < 0 || p.x >= SCREEN_W / 2 || p.y < 0 || p.y >= SCREEN_H / 2)
+        return;
+    put_pixel(p, color);
+}
+
+void put_pixel(vec2d p, vec3d color)
+{
+    u8 red = (u8)(color.x);
+    u8 green = (u8)(color.y);
+    u8 blue = (u8)(color.z);
+    u32 *pixel = (u32 *)(vga_buffer[vga_buffer_ptr] + (int)(p.y * SCREEN_W + p.x));
+    *pixel = COLOR(red, green, blue);
+}
+
+void draw_char(char c, u8 size, vec2d pos, vec3d color)
+{
+    u8 *glyph = font8x8_basic[c];
+    u8 x, y;
+    for (y = 0; y < 8 * size; y++)
+    {
+        for (x = 0; x < 8 * size; x++)
+        {
+            if ((glyph[y / size] >> (x / size)) & 1)
+                put_pixel(VEC2D(pos.x + x, pos.y + y), color);
+        }
+    }
+}
+
+void draw_string(const char *str, u8 size, vec2d pos, vec3d color)
+{
+    u8 i = 0;
+    while (str[i])
+    {
+        draw_char(str[i], size, VEC2D(pos.x + (i * 8 * size), pos.y), color);
+        i++;
+    }
 }
 
 // DDA algorithm
-void draw_line(vec2d v1, vec2d v2, u8 color)
+void draw_line(vec2d v1, vec2d v2, vec3d color)
 {
     i32 dx, dy, steps, i;
     f32 xinc, yinc, x, y;
@@ -35,14 +73,14 @@ void draw_line(vec2d v1, vec2d v2, u8 color)
     }
 }
 
-void draw_triangle(triangle_t *t, u32 size, u8 color)
+void draw_triangle(triangle_t *t, u32 size, vec3d color)
 {
     draw_line((vec2d){t->p[0].x * size, t->p[0].y * size}, (vec2d){t->p[1].x * size, t->p[1].y * size}, color);
     draw_line((vec2d){t->p[1].x * size, t->p[1].y * size}, (vec2d){t->p[2].x * size, t->p[2].y * size}, color);
     draw_line((vec2d){t->p[2].x * size, t->p[2].y * size}, (vec2d){t->p[0].x * size, t->p[0].y * size}, color);
 }
 
-void fill_triangle(triangle_t *t, u32 size, u8 color)
+void fill_triangle(triangle_t *t, u32 size, vec3d color)
 {
     vec2d p1 = (vec2d){t->p[0].x * size, t->p[0].y * size};
     vec2d p2 = (vec2d){t->p[1].x * size, t->p[1].y * size};
@@ -67,15 +105,26 @@ void fill_triangle(triangle_t *t, u32 size, u8 color)
     }
 }
 
+void fill_vga_buffer(u32 value)
+{
+    memset(vga_buffer[vga_buffer_ptr], value, SCREEN_W * SCREEN_H * sizeof(u32));
+}
+
 void clear_vga_buffer()
 {
-    memset(vga_buffer, 0, SCREEN_W * SCREEN_H);
+    fill_vga_buffer(0);
+}
+
+void swap_buffers()
+{
+    vga_buffer_ptr = (vga_buffer_ptr + 1) % 2;
 }
 
 void render()
 {
     // TODO: We can optimize this by only rendering the pixels that have changed since the last render by using changes queue
-    memcpy(vga_memory, vga_buffer, SCREEN_W * SCREEN_H);
+    memcpy(vga_memory, vga_buffer[vga_buffer_ptr], SCREEN_W * SCREEN_H * sizeof(u32));
+    swap_buffers();
 }
 
 vec2d to_screen_space(vec2d p)

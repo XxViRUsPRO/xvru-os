@@ -6,7 +6,6 @@
 #define MAX_ROWS 25
 #define MAX_COLS 80
 #define DEFAULT_COLOR 0x07
-
 static u8 cursor_x = 0;
 static u8 cursor_y = 0;
 static u8 *vidmem = (u8 *)VIDEO_ADDRESS;

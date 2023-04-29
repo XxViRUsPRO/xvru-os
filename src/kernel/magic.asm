@@ -99,13 +99,13 @@ inw:
     IN AX, DX
     RET
 
-global CLI
-CLI:
+global cli
+cli:
     CLI
     RET
 
-global STI
-STI:
+global sti
+sti:
     STI
     RET
 

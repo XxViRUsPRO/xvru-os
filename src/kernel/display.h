@@ -3,33 +3,19 @@
 #include <types.h>
 #include <math.h>
 
-#define VGA_MEM 0xA0000
-#define SCREEN_W 320
-#define SCREEN_H 200
+#define VGA_MEM 0xfd000000
+#define SCREEN_W 800
+#define SCREEN_H 600
 #define MAX_X (SCREEN_W / 2) - 1
 #define MAX_Y (SCREEN_H / 2) - 1
 #define MIN_X -MAX_X
 #define MIN_Y -MAX_Y
 
-#define VGA_COLOR_BLACK 0
-#define VGA_COLOR_BLUE 1
-#define VGA_COLOR_GREEN 2
-#define VGA_COLOR_CYAN 3
-#define VGA_COLOR_RED 4
-#define VGA_COLOR_MAGENTA 5
-#define VGA_COLOR_BROWN 6
-#define VGA_COLOR_LIGHT_GRAY 7
-#define VGA_COLOR_DARK_GRAY 8
-#define VGA_COLOR_LIGHT_BLUE 9
-#define VGA_COLOR_LIGHT_GREEN 10
-#define VGA_COLOR_LIGHT_CYAN 11
-#define VGA_COLOR_LIGHT_RED 12
-#define VGA_COLOR_LIGHT_MAGENTA 13
-#define VGA_COLOR_YELLOW 14
-#define VGA_COLOR_WHITE 15
+#define PIXEL_OFFSET(x, y, pitch, bpp) (y * (pitch / (bpp / 8)) + x)
+#define COLOR(r, g, b) ((b) | (g << 8) | (r << 16))
 
-static u8 *vga_memory = (u8 *)VGA_MEM;
-static u8 vga_buffer[200][320] = {0};
+static u32 *vga_memory = (u32 *)VGA_MEM;
+static u32 vga_buffer[2][SCREEN_W * SCREEN_H] = {0};
 
 typedef struct
 {
@@ -60,10 +46,15 @@ typedef struct
 #define VEC2D(x, y) ((vec2d){x, y})
 #define VEC3D(x, y, z) ((vec3d){x, y, z})
 
-void draw_pixel(vec2d p, u8 color);
-void draw_line(vec2d v1, vec2d v2, u8 color);
-void draw_triangle(triangle_t *t, u32 size, u8 color);
-void fill_triangle(triangle_t *t, u32 size, u8 color);
+void draw_pixel(vec2d p, vec3d color);
+void put_pixel(vec2d p, vec3d color);
+void draw_char(char c, u8 size, vec2d pos, vec3d color);
+void draw_string(const char *str, u8 size, vec2d pos, vec3d color);
+void draw_line(vec2d v1, vec2d v2, vec3d color);
+void draw_triangle(triangle_t *t, u32 size, vec3d color);
+void fill_triangle(triangle_t *t, u32 size, vec3d color);
+void swap_buffers();
+void fill_vga_buffer(u32 value);
 void clear_vga_buffer();
 void render();
 vec2d to_screen_space(vec2d p);

@@ -15,8 +15,8 @@ _cdecl void outw(u16 port, u16 value);
 _cdecl u16 inw(u16 port);
 
 void panic(void);
-void CLI(void);
-void STI(void);
+void cli(void);
+void sti(void);
 void io_wait();
 
 // Register structs for interrupt/exception

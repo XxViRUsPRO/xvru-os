@@ -16,6 +16,8 @@
 // 0x00020000 - 0x00030000 - stage2
 
 // 0x00030000 - 0x00080000 - free
+#define MEMORY_VBE_INFO_ADDR ((void *)0x30000)
+#define MEMORY_VBE_MODE_INFO_ADDR ((void *)0x40000)
 
 // 0x00080000 - 0x0009FFFF - Extended BIOS data area
 // 0x000A0000 - 0x000C7FFF - Video

@@ -7,6 +7,7 @@
 void putchar(int x, int y, char c, char color)
 {
     vidmem[2 * (y * MAX_COLS + x)] = c;
+    vidmem[2 * (y * MAX_COLS + x) + 1] = color;
 }
 
 void putcolor(int x, int y, char color)

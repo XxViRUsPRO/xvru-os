@@ -1,5 +1,6 @@
-#pragma once
-#include <stdint.h>
+#ifndef FONT_H
+#define FONT_H
+#include <types.h>
 
 /**
  * 8x8 monochrome bitmap fonts for rendering
@@ -153,3 +154,5 @@ u8 font8x8_basic[128][8] = {
     {0x6E, 0x3B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // U+007E (~)
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}  // U+007F
 };
+
+#endif

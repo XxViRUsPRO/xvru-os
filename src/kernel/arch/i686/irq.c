@@ -28,13 +28,13 @@ void IRQ_init()
     for (u8 i = 0; i < 16; i++)
         ISR_install(PIC_REMAP_OFFSET + i, IRQ_handler);
 
-    STI();
+    sti();
 }
 
 void IRQ_install(u8 irq, IRQ_handler_t handler)
 {
-    CLI();
+    cli();
     IRQ_handlers[irq] = handler;
     PIC_mask(irq, false);
-    STI();
+    sti();
 }
