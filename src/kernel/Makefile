@@ -22,7 +22,7 @@ $(BUILD_DIR)/kernel.bin: $(OBJECTS_C) $(OBJECTS_ASM)
 $(BUILD_DIR)/c/%.o: %.c $(SOURCES_HEADERS)
 	@echo "Compiling \e[33m\e[4m$<\e[0m..."
 	@mkdir -p $(@D)
-	@$(TARGET_CC) $(TARGET_CFLAGS) -c -o $@ $<
+	@$(TARGET_CC) $(TARGET_CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/asm/%.o: %.asm $(SOURCES_INCLUDES)
 	@echo "Assembling \e[33m\e[4m$<\e[0m..."

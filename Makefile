@@ -42,7 +42,7 @@ $(BUILD_DIR)/kernel/kernel.bin: always
 
 run: os
 	@echo "\e[32mRunning...\e[0m"
-	@qemu-system-i386 -fda build/os.img -vga std
+	@qemu-system-i386 -fda build/os.img -vga std -debugcon stdio
 
 debug: os
 	@echo "\e[32mDebug...\e[0m"

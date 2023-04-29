@@ -32,6 +32,7 @@ boot: floppy
 # ata0-master: type=disk, path=$1, mode=flat, cylinders=262, heads=16, spt=32
 # boot: disk
 mouse: enabled=0
+port_e9_hack: enabled=1
 # log: bochsout.txt
 EOF
 
