@@ -19,6 +19,7 @@ export TARGET_LIBS =
 
 export SOURCE_DIR = $(abspath .)
 export BUILD_DIR = $(abspath build)
+export ROOT_DIR = $(abspath .)
 
 export MAKEARGS = --no-print-directory
 

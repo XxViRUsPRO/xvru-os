@@ -17,7 +17,7 @@ typedef struct
     u16 last_modification_date;
     u16 first_cluster_low;
     u32 file_size;
-} __attribute__((packed)) directory_entry_t;
+} __attribute__((packed)) DirectoryEntry;
 
 typedef struct
 {
@@ -25,9 +25,9 @@ typedef struct
     bool is_directory;
     u32 position;
     u32 size;
-} fat_file_t;
+} FatFile;
 
-enum FAT_Attributes
+enum EFatAttributes
 {
     FAT_ATTRIBUTE_READ_ONLY = 0x01,
     FAT_ATTRIBUTE_HIDDEN = 0x02,
@@ -38,10 +38,10 @@ enum FAT_Attributes
     FAT_ATTRIBUTE_LFN = FAT_ATTRIBUTE_READ_ONLY | FAT_ATTRIBUTE_HIDDEN | FAT_ATTRIBUTE_SYSTEM | FAT_ATTRIBUTE_VOLUME_ID
 };
 
-bool fat_init(disk_t *disk);
-fat_file_t *fat_open(disk_t *disk, const char *path);
-u32 fat_read(disk_t *disk, fat_file_t *file, u32 byteCount, void *dataOut);
-bool fat_read_entry(disk_t *disk, fat_file_t *file, directory_entry_t *dirEntry);
-void fat_close(fat_file_t *file);
+bool fat_init(Disk *disk);
+FatFile *fat_open(Disk *disk, const char *path);
+u32 fat_read(Disk *disk, FatFile *file, u32 byteCount, void *dataOut);
+bool fat_read_entry(Disk *disk, FatFile *file, DirectoryEntry *dirEntry);
+void fat_close(FatFile *file);
 
 #endif

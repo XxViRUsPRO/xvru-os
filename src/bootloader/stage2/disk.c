@@ -2,7 +2,7 @@
 #include "x86.h"
 #include "stdio.h"
 
-bool disk_init(disk_t *disk, u8 id)
+bool disk_init(Disk *disk, u8 id)
 {
     u8 drive_type;
     u16 cylinders, sectors, heads;
@@ -15,7 +15,7 @@ bool disk_init(disk_t *disk, u8 id)
     return true;
 }
 
-void disk_lba2chs(disk_t *disk, u32 lba, u16 *cylinder, u16 *head, u16 *sector)
+void disk_lba2chs(Disk *disk, u32 lba, u16 *cylinder, u16 *head, u16 *sector)
 {
     // sector = (LBA % sectors per track + 1)
     *sector = (lba % disk->sectors) + 1;
@@ -27,7 +27,7 @@ void disk_lba2chs(disk_t *disk, u32 lba, u16 *cylinder, u16 *head, u16 *sector)
     *head = (lba / disk->sectors) % disk->heads;
 }
 
-bool disk_read_sectors(disk_t *disk, u32 lba, u8 count, void *buffer)
+bool disk_read_sectors(Disk *disk, u32 lba, u8 count, void *buffer)
 {
     u16 cylinder, head, sector;
     disk_lba2chs(disk, lba, &cylinder, &head, &sector);

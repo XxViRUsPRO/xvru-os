@@ -1,18 +1,21 @@
 #include <types.h>
+#include <debug.h>
 #include "disk.h"
 #include "stdio.h"
 #include "fat.h"
 #include "memdefs.h"
+#include "memdetect.h"
 #include "string.h"
 #include "vesa.h"
 
 #define PIXEL_OFFSET(x, y, pitch, bpp) (y * (pitch / (bpp / 8)) + x)
 #define COLOR(r, g, b) ((b) | (g << 8) | (r << 16))
 
-typedef void (*KernelEntry)(VbeInfoBlock *info);
+KernelArgs g_KernelArgs;
+
+typedef void (*KernelEntry)(KernelArgs *kernelArgs);
 u8 *kernel_load_buffer = (u8 *)MEMORY_LOAD_KERNEL;
 u8 *kernel = (u8 *)MEMORY_KERNEL_ADDR;
-const char *kernel_path = "/kernel.bin";
 
 void __attribute__((cdecl)) start(u8 disk_id)
 {
@@ -20,7 +23,7 @@ void __attribute__((cdecl)) start(u8 disk_id)
     disable_cursor();
 
     // Initialize disk
-    disk_t disk;
+    Disk disk;
     if (!disk_init(&disk, disk_id))
     {
         printf("Failed to initialize disk\n");
@@ -35,7 +38,7 @@ void __attribute__((cdecl)) start(u8 disk_id)
     }
 
     // Read kernel from disk into memory
-    fat_file_t *file = fat_open(&disk, kernel_path);
+    FatFile *file = fat_open(&disk, "/kernel.bin");
     u32 read;
     u8 *kernel_buffer = kernel;
     while ((read = fat_read(&disk, file, MEMORY_LOAD_SIZE, kernel_load_buffer)) > 0)
@@ -44,6 +47,9 @@ void __attribute__((cdecl)) start(u8 disk_id)
         kernel_buffer += read;
     }
     fat_close(file);
+
+    // Initialize memory
+    mem_get_map(&g_KernelArgs.memoryPool);
 
     // Initialize VESA
     VbeInfoBlock *info = (VbeInfoBlock *)MEMORY_VBE_INFO_ADDR;
@@ -102,5 +108,5 @@ void __attribute__((cdecl)) start(u8 disk_id)
 
     // Call the main function of the kernel
     KernelEntry kmain = (KernelEntry)kernel;
-    kmain(mode_info);
+    kmain(&g_KernelArgs);
 }

@@ -1,7 +1,7 @@
-#include "debug.h"
+#include "./debug.h"
 #include "types.h"
 
-inline void outb(u16 port, u8 val)
+void __outb(u16 port, u8 val)
 {
     __asm__ __volatile__("outb %0, %1"
                          :
@@ -10,7 +10,7 @@ inline void outb(u16 port, u8 val)
 
 void dbg_putc(char c)
 {
-    outb(0xE9, c);
+    __outb(0xE9, c);
 }
 
 void dbg_puts(const char *s)

@@ -1,6 +1,6 @@
 include config.mk
 
-.PHONY: all bootloader kernel clean always debug run os
+.PHONY: all bootloader kernel libs clean always debug run os
 
 all: os run
 

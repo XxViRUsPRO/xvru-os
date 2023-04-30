@@ -381,7 +381,62 @@ x86_vbe_get_mode_:
     pop edi
     pop es
 
+    ; Return
+    push eax
+
+    EnterProtectedMode
+
+    pop eax
+
+    mov esp, ebp
     pop ebp
+    ret
+
+; _cdecl i32 x86_mem_map_(x86_mem_map_entry_t *entries, u32 *cont_id);
+global x86_mem_map_
+x86_mem_map_:
+    bits 32
+    push ebp
+    mov ebp, esp
+
+    EnterRealMode
+
+    push es
+    push ds
+    push esi
+    push edi
+    push ebx
+    push ecx
+    push edx
+
+    LinearToSegOffset [bp+8], es, edi, di
+    LinearToSegOffset [bp+12], ds, esi, si
+    mov ebx, ds:[si]
+
+    ; Call Memory Map interrupt
+    mov eax, 0xE820
+    mov ecx, 24
+    mov edx, E820Signature
+    int 0x15
+
+    cmp eax, E820Signature
+    jne .error
+
+.success:
+    mov eax, ecx
+    mov ds:[si], ebx
+    jmp .end
+.error:
+    mov eax, -1
+.end:
+
+    pop edx
+    pop ecx
+    pop ebx
+    pop edi
+    pop esi
+    pop ds
+    pop es
 
     ; Return
     push eax
@@ -393,3 +448,8 @@ x86_vbe_get_mode_:
     mov esp, ebp
     pop ebp
     ret
+
+;
+;   Constants
+;
+E820Signature equ 0x534D4150

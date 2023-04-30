@@ -8,9 +8,9 @@ typedef struct
     u16 cylinders;
     u16 sectors;
     u16 heads;
-} disk_t;
+} Disk;
 
-bool disk_init(disk_t *disk, u8 id);
-bool disk_read_sectors(disk_t *disk, u32 lba, u8 count, void *buffer);
+bool disk_init(Disk *disk, u8 id);
+bool disk_read_sectors(Disk *disk, u32 lba, u8 count, void *buffer);
 
 #endif
