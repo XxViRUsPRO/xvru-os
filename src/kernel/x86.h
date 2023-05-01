@@ -13,7 +13,8 @@ void panic();
 void cli();
 void sti();
 void io_wait();
-void x86_enablePaging();
+void x86_enable_paging();
+void x86_load_pdbr(void *pdbr);
 
 // Register structs for interrupt/exception
 typedef struct registers

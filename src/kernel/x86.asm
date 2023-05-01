@@ -114,9 +114,16 @@ panic:
     CLI
     HLT
 
-global enablePaging:
-enablePaging:
+global x86_enable_paging:
+x86_enable_paging:
     mov eax, cr0
     or eax, 0x80000000
     mov cr0, eax
+    ret
+
+; void x86_load_pdbr(void *pdbr);
+global x86_load_pdbr:
+x86_load_pdbr:
+    mov eax, [esp+4]
+    mov cr3, eax
     ret

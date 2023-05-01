@@ -9,6 +9,7 @@
 #include <debug.h>
 #include <drivers/timer.h>
 #include <mem/pmm.h>
+#include <mem/vmm.h>
 
 const u32 PMM_MEMORY_MAP_ADDRESS = 0x50000;
 
@@ -71,6 +72,13 @@ void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
     pmm_init_region(largestBlock->base, largestBlock->length);
     // Reserve the memory from 0x0 to kernel end boundary
     pmm_deinit_region(0, largestBlock->base);
+
+    // Initialize the Virtual Memory Manager
+    if (!vmm_init())
+    {
+        dbg_puts("Failed to initialize the Virtual Memory Manager\n");
+        return;
+    }
 
     // Infinite loop to prevent the kernel from exiting
     while (1)
