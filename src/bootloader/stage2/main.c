@@ -48,9 +48,6 @@ void __attribute__((cdecl)) start(u8 disk_id)
     }
     fat_close(file);
 
-    // Initialize memory
-    mem_get_map(&g_KernelArgs.memoryPool);
-
     // Initialize VESA
     VbeInfoBlock *info = (VbeInfoBlock *)MEMORY_VBE_INFO_ADDR;
     if (!vbe_get_info(info))
@@ -105,6 +102,9 @@ void __attribute__((cdecl)) start(u8 disk_id)
             framebuffer[PIXEL_OFFSET(x, y, pitch, bpp)] = COLOR(x * 255 / width, y * 255 / height, 0);
         }
     }
+
+    // Initialize memory
+    mem_get_map(&g_KernelArgs.memoryPool);
 
     // Call the main function of the kernel
     KernelEntry kmain = (KernelEntry)kernel;

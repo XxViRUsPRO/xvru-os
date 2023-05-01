@@ -1,7 +1,7 @@
 #include "timer.h"
 #include <arch/i686/isr.h>
 #include <arch/i686/irq.h>
-#include <magic.h>
+#include <x86.h>
 
 #define PIT_A 0x40
 #define PIT_B 0x41

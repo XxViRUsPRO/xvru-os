@@ -1,6 +1,6 @@
 #include "stdio.h"
 #include "string.h"
-#include "magic.h"
+#include "x86.h"
 #include "math.h"
 #include <stdarg.h>
 

@@ -1,4 +1,4 @@
-#include "magic.h"
+#include "x86.h"
 
 #define UNUSED_PORT 0x80
 

@@ -3,7 +3,7 @@
 #include "gdt.h"
 #include <string.h>
 #include <stdio.h>
-#include <magic.h>
+#include <x86.h>
 
 ISR_handler_t ISR_handlers[256];
 

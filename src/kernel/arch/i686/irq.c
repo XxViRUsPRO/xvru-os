@@ -1,6 +1,6 @@
 #include "irq.h"
 #include "pic.h"
-#include <magic.h>
+#include <x86.h>
 #include <stdio.h>
 
 #define PIC_REMAP_OFFSET 0x20
