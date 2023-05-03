@@ -15,6 +15,7 @@ void sti();
 void io_wait();
 void x86_enable_paging();
 void x86_load_pdbr(void *pdbr);
+void x86_flush_tlb(void *address);
 
 // Register structs for interrupt/exception
 typedef struct registers

@@ -14,6 +14,6 @@ void pmm_init_region(u32 base_address, u32 size);
 void pmm_deinit_region(u32 base_address, u32 size);
 u32 *pmm_alloc_blocks(u32 num_blocks);
 void pmm_free_blocks(u32 *address, u32 num_blocks);
-u32 pmm_get_block_count();
+u32 pmm_get_blocks_count();
 
 #endif

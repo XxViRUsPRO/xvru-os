@@ -224,15 +224,17 @@ int itoa(int value, char *buffer, int base)
     unsigned long ud = value;
     int divisor = 10;
 
-    // If %d is specified and D is minus, put `-' in the head.
-    if (base == 'd' && value < 0)
+    // If base is 10 and value is negative, put a '-' in the buffer.
+    if (base == 10 && value < 0)
     {
         *p++ = '-';
         buffer++;
         ud = -value;
     }
-    else if (base == 'x')
+    else if (base == 16)
+    {
         divisor = 16;
+    }
 
     // Divide UD by DIVISOR until UD == 0.
     do

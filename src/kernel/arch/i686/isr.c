@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <x86.h>
+#include <debug.h>
 
 ISR_handler_t ISR_handlers[256];
 
@@ -574,7 +575,9 @@ void __attribute__((cdecl)) ISR_handler(Registers *regs)
         ISR_handlers[regs->int_no](regs);
 
     else if (regs->int_no >= 32)
+    {
         printf("Unhandled interrupt %d!\n", regs->int_no);
+    }
 
     else
     {
@@ -589,6 +592,7 @@ void __attribute__((cdecl)) ISR_handler(Registers *regs)
         printf("  interrupt=%x  errorcode=%x\n", regs->int_no, regs->err_code);
 
         printf("KERNEL PANIC!\n");
+
         panic();
     }
 }

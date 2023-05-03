@@ -2,17 +2,17 @@
 #include <string.h>
 #include <debug.h>
 
-void pmm_map_set(i32 bit)
+inline static void pmm_map_set(i32 bit)
 {
     pmm_memory_map[bit / 32] |= (1 << (bit % 32));
 }
 
-void pmm_map_unset(i32 bit)
+inline static void pmm_map_unset(i32 bit)
 {
     pmm_memory_map[bit / 32] &= ~(1 << (bit % 32));
 }
 
-bool pmm_map_test(i32 bit)
+inline static bool pmm_map_test(i32 bit)
 {
     return pmm_memory_map[bit / 32] & (1 << (bit % 32));
 }
@@ -37,15 +37,20 @@ i32 pmm_first_free_block(u32 num_blocks)
 
                 if (!(pmm_memory_map[i] & bit))
                 {
-                    i32 start_bit = i * 32 + bit;
-                    u32 pmm_free_blocks = 0;
-
-                    for (u32 count = 0; count <= num_blocks; count++)
+                    for (u32 count = 0, free_blocks = 0; count < num_blocks; count++)
                     {
-                        if (!pmm_map_test(start_bit + count))
-                            pmm_free_blocks++;
+                        if ((j + count > 31) && (i + 1 <= pmm_max_blocks / 32))
+                        {
+                            if (!(pmm_memory_map[i + 1] & (1 << ((j + count) - 32))))
+                                free_blocks++;
+                        }
+                        else
+                        {
+                            if (!(pmm_memory_map[i] & (1 << (j + count))))
+                                free_blocks++;
+                        }
 
-                        if (pmm_free_blocks == num_blocks)
+                        if (free_blocks == num_blocks)
                             return i * 32 + j;
                     }
                 }

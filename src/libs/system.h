@@ -19,6 +19,7 @@ typedef struct
 typedef struct
 {
     MemoryPool memoryPool;
+    u32 kernelSize;
 } KernelArgs;
 
 #endif

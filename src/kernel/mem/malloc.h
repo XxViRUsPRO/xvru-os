@@ -11,12 +11,11 @@ typedef struct malloc_block
     struct malloc_block *next;
 } malloc_block_t;
 
-malloc_block_t *malloc_head = NULL;
-u32 malloc_virtual_address = NULL;
-u32 malloc_physical_address = NULL;
-u32 total_malloc_pages = 0;
-
-void *malloc(u32 size);
-void free(void *ptr);
+void malloc_init(u32 bytes);
+void malloc_split(malloc_block_t *node, u32 size);
+void *malloc_next_block(u32 size);
+void merge_free_blocks(void);
+void malloc_free(void *ptr);
+malloc_block_t *malloc_get_list_head(void);
 
 #endif

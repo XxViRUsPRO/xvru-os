@@ -2,9 +2,9 @@
 #define VMM_H
 #include <types.h>
 
-#define PAGE_SIZE 4096
-#define PAGE_TABLE_SIZE 1024
-#define PAGE_DIRECTORY_SIZE 1024
+#define VMM_PAGE_SIZE 4096
+#define VMM_PAGE_TABLE_SIZE 1024
+#define VMM_PAGE_DIRECTORY_SIZE 1024
 
 #define PTABLE_ADDR_SPACE_SIZE 0x400000
 #define DTABLE_ADDR_SPACE_SIZE 0x100000000
@@ -16,6 +16,7 @@
 #define SET_FRAME(x, addr) (*x = (*x & ~0x7FFFF000) | addr)
 #define SET_ATTRIB(x, attrib) (*x |= attrib)
 #define CLEAR_ATTRIB(x, attrib) (*x &= ~attrib)
+#define TEST_ATTRIB(x, attrib) (*x & attrib)
 
 typedef u32 pt_entry_t;
 typedef u32 pd_entry_t;
@@ -51,16 +52,20 @@ enum EPageDirectoryEntryFlags
 
 typedef struct
 {
-    pt_entry_t entries[PAGE_TABLE_SIZE];
+    pt_entry_t entries[VMM_PAGE_TABLE_SIZE];
 } PageTable;
 
 typedef struct
 {
-    pd_entry_t entries[PAGE_DIRECTORY_SIZE];
+    pd_entry_t entries[VMM_PAGE_DIRECTORY_SIZE];
 } PageDirectory;
 
 bool vmm_init();
-bool vmm_alloc_page(pt_entry_t *e);
+void *vmm_alloc_page(pt_entry_t *e);
 void vmm_free_page(pt_entry_t *e);
+bool vmm_map_page(void *phys, void *virt);
+void vmm_unmap_page(void *virt);
+pt_entry_t *vmm_get_page(void *virt);
+void vmm_flush_tlb(void *virt);
 
 #endif

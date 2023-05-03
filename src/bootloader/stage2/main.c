@@ -39,6 +39,7 @@ void __attribute__((cdecl)) start(u8 disk_id)
 
     // Read kernel from disk into memory
     FatFile *file = fat_open(&disk, "/kernel.bin");
+    g_KernelArgs.kernelSize = file->size;
     u32 read;
     u8 *kernel_buffer = kernel;
     while ((read = fat_read(&disk, file, MEMORY_LOAD_SIZE, kernel_load_buffer)) > 0)
