@@ -22,29 +22,9 @@ enum EMemoryBlockTypes
     MEMORY_BLOCK_BAD = 5,
 };
 
-char *memoryBlockTypeToString(u32 type)
-{
-    switch (type)
-    {
-    case MEMORY_BLOCK_FREE:
-        return "Free";
-    case MEMORY_BLOCK_RESERVED:
-        return "Reserved";
-    case MEMORY_BLOCK_ACPI_RECLAIMABLE:
-        return "ACPI Reclaimable";
-    case MEMORY_BLOCK_ACPI_NVS:
-        return "ACPI NVS";
-    case MEMORY_BLOCK_BAD:
-        return "Bad";
-    default:
-        return "Unknown";
-    }
-}
-
 void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
 {
     //! Initialize the HAL
-    dbg_puts("Initializing the HAL\n");
     HAL_init();
     timer_init();
 
@@ -54,15 +34,10 @@ void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
     u32 count = memoryPool->count;
     u32 totalMemory = 0;
     MemoryBlock *largestBlock = NULL;
-    char str[256];
-    sprintf(str, "Memory blocks: %d\n", count);
-    dbg_puts(str);
     for (u32 i = 0; i < count; i++)
     {
         MemoryBlock *block = &blocks[i];
         totalMemory += block->length;
-        sprintf(str, "Block %d (%s) - Base: 0x%x%x, Size: %f KB (%f MB)\n", i, memoryBlockTypeToString(block->type), (u32)(block->base >> 32), (u32)(block->base & 0xFFFFFFFF), (double)block->length / 1024, (double)block->length / 1024 / 1024);
-        dbg_puts(str);
         if (block->type == MEMORY_BLOCK_FREE)
         {
             if (largestBlock == NULL || block->length > largestBlock->length)
@@ -71,7 +46,6 @@ void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
     }
 
     //! Initialize the Physical Memory Manager
-    dbg_puts("Initializing the Physical Memory Manager\n");
     // pmm_init(PMM_MEMORY_MAP_ADDRESS, largestBlock->length);
     pmm_init(PMM_MEMORY_MAP_ADDRESS, totalMemory);
 
@@ -91,10 +65,8 @@ void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
     pmm_deinit_region(0, largestBlock->base + (kernelArgs->kernelSize * 4));
 
     // //! Initialize the Virtual Memory Manager
-    dbg_puts("Initializing the Virtual Memory Manager\n");
     if (!vmm_init())
     {
-        dbg_puts("Failed to initialize the Virtual Memory Manager\n");
         return;
     }
 
@@ -126,11 +98,7 @@ void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
         vmm_unmap_page((void *)i);
     }
 
-    dbg_puts("Kernel initialized\n");
-
     void *ptr = malloc(100);
-    sprintf(str, "Allocated block at 0x%x\n", ptr);
-    dbg_puts(str);
     free(ptr);
 
     //! Infinite loop to prevent the kernel from exiting
