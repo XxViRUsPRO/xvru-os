@@ -10,7 +10,7 @@ void *memcpy(void *dest, const void *src, size_t count)
     return dest;
 }
 
-void *memset(void *dest, u8 val, size_t count)
+void *memset(void *dest, i32 val, size_t count)
 {
     char *temp = (char *)dest;
     for (; count != 0; count--)

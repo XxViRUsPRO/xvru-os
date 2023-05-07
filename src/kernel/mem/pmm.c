@@ -1,6 +1,5 @@
 #include "pmm.h"
 #include <string.h>
-#include <debug.h>
 
 inline static void pmm_map_set(i32 bit)
 {
@@ -17,9 +16,19 @@ inline static bool pmm_map_test(i32 bit)
     return pmm_memory_map[bit / 32] & (1 << (bit % 32));
 }
 
-u32 pmm_get_blocks_count()
+u32 pmm_get_max_blocks()
 {
     return pmm_max_blocks;
+}
+
+u32 pmm_get_used_blocks()
+{
+    return pmm_used_blocks;
+}
+
+u32 pmm_get_free_blocks()
+{
+    return pmm_max_blocks - pmm_used_blocks;
 }
 
 i32 pmm_first_free_block(u32 num_blocks)

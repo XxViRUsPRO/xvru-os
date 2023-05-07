@@ -1,15 +1,14 @@
-#include "stdio.h"
-#include "string.h"
-#include "x86.h"
-#include "math.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <hal/hal.h>
 #include <types.h>
 #include <system.h>
-#include <debug.h>
+#include <math.h>
+#include <x86.h>
 #include <drivers/timer.h>
 #include <mem/pmm.h>
 #include <mem/vmm.h>
-#include <stdlib.h>
+#include <display.h>
 
 const u32 PMM_MEMORY_MAP_ADDRESS = 0x30000;
 
@@ -24,11 +23,11 @@ enum EMemoryBlockTypes
 
 void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
 {
-    //! Initialize the HAL
+    // Initialize the HAL
     HAL_init();
     timer_init();
 
-    //! Memory Map
+    // Memory Map
     MemoryPool *memoryPool = &kernelArgs->memoryPool;
     MemoryBlock *blocks = memoryPool->blocks;
     u32 count = memoryPool->count;
@@ -44,12 +43,12 @@ void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
                 largestBlock = block;
         }
     }
+    fprintf(DEBUG_FD, "Total Memory: %d B (%f MB)\n", totalMemory, totalMemory / 1024 / 1024.0f);
 
-    //! Initialize the Physical Memory Manager
-    // pmm_init(PMM_MEMORY_MAP_ADDRESS, largestBlock->length);
+    // Initialize the Physical Memory Manager
     pmm_init(PMM_MEMORY_MAP_ADDRESS, totalMemory);
 
-    // init memory regions with type 1
+    // Init memory regions with type 1
     for (u32 i = 0; i < count; i++)
     {
         MemoryBlock *block = &blocks[i];
@@ -59,18 +58,16 @@ void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
         }
     }
 
-    // Set the largest block as free
-    pmm_init_region(largestBlock->base, largestBlock->length);
     // Reserve the memory from 0x0 to kenrel base which is 0x100000 + kernel size * 4
     pmm_deinit_region(0, largestBlock->base + (kernelArgs->kernelSize * 4));
 
-    // //! Initialize the Virtual Memory Manager
+    // Initialize the Virtual Memory Manager
     if (!vmm_init())
     {
         return;
     }
 
-    // //! Map the framebuffer region
+    // Map the framebuffer region
     const u32 fb_size = 800 * 600 * 4;
     u32 fb_size_pages = ceil((double)fb_size / 4096);
     fb_size_pages *= 2;
@@ -79,29 +76,25 @@ void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
         vmm_map_page((void *)fb_start, (void *)fb_start);
     }
 
-    // //! Deinit the framebuffer region
+    // Deinit the framebuffer region
     u32 *fb = (u32 *)0xfd000000;
-    pmm_deinit_region((u32)fb, fb_size);
-    // fill screen with another test pattern to make sure that our idenity mapping is working correctly (draw rainbow pattern)
-    for (u32 y = 0; y < 600; y++)
-    {
-        for (u32 x = 0; x < 800; x++)
-        {
-            u32 index = y * 800 + x;
-            fb[index] = (x << 16) | (y << 8) | (x + y);
-        }
-    }
+    pmm_deinit_region((u32)fb, fb_size_pages * 4096);
 
-    // unmap the kernel lower half
-    for (u32 i = 0x100000; i < 0x400000; i += 4096)
-    {
-        vmm_unmap_page((void *)i);
-    }
+    // Unmap the kernel lower half
+    // for (u32 i = 0x100000; i < 0x400000; i += 4096)
+    // {
+    //     vmm_unmap_page((void *)i);
+    // }
+    // vmm_unmap_page((void *)0x100000);
 
-    void *ptr = malloc(100);
-    free(ptr);
+    // Flush the TLB
+    __asm__ __volatile__("mov %cr3, %eax; mov %eax, %cr3;");
 
-    //! Infinite loop to prevent the kernel from exiting
+    display_init((void *)fb, 800, 600, 800 * 4, 32);
+    display_clear(0x0000ff00);
+    display_render();
+
+    // Infinite loop to prevent the kernel from exiting
     while (1)
         ;
 

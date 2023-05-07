@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <x86.h>
-#include <debug.h>
 
 ISR_handler_t ISR_handlers[256];
 

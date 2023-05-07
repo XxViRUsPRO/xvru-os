@@ -1,4 +1,5 @@
-#include "ctype.h"
+#ifndef CTYPE_H
+#define CTYPE_H
 
 int isdigit(int c)
 {
@@ -52,3 +53,5 @@ int toupper(int c)
 {
     return islower(c) ? c + 'A' - 'a' : c;
 }
+
+#endif
