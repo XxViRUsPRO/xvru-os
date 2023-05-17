@@ -1,7 +1,7 @@
 #include "stdio.h"
-#include "string.h"
 #include "x86.h"
 #include <stdarg.h>
+#include <string.h>
 
 void putchar(int x, int y, char c, char color)
 {
@@ -264,3 +264,29 @@ int itoa(int value, char *buffer, int base)
 
     return p - buffer;
 }
+
+#if 1
+void console_log_putchar(char c)
+{
+    outb(0xE9, c);
+}
+
+void console_log_puts(const char *str)
+{
+    while (*str)
+    {
+        console_log_putchar(*str);
+        str++;
+    }
+}
+
+void console_log(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    char str[1024];
+    vsprintf(str, fmt, args);
+    va_end(args);
+    console_log_puts(str);
+}
+#endif

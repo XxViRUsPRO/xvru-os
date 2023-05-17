@@ -1,5 +1,5 @@
-#ifndef MAGIC_H
-#define MAGIC_H
+#ifndef X86_H
+#define X86_H
 #include <types.h>
 
 #define _cdecl __attribute__((cdecl))
@@ -9,13 +9,12 @@ _cdecl u8 inb(u16 port);
 _cdecl void outw(u16 port, u16 value);
 _cdecl u16 inw(u16 port);
 
-void panic();
 void cli();
 void sti();
 void io_wait();
-void x86_enable_paging();
-void x86_load_pdbr(void *pdbr);
-void x86_flush_tlb(void *address);
+
+void __panic(const char *msg);
+#define PANIC(__MSG__) __panic(__MSG__)
 
 // Register structs for interrupt/exception
 typedef struct registers

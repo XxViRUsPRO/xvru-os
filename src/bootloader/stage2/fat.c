@@ -1,9 +1,9 @@
 #include "fat.h"
 #include "memdefs.h"
-#include <string.h>
-#include "utils.h"
 #include "stdio.h"
+#include <utils.h>
 #include <ctype.h>
+#include <string.h>
 
 #define SECTOR_SIZE 512
 #define MAX_PATH_SIZE 256

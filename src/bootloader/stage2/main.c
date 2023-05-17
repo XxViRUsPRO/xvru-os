@@ -1,59 +1,52 @@
 #include <types.h>
-#include <debug.h>
 #include "disk.h"
 #include "stdio.h"
 #include "fat.h"
 #include "memdefs.h"
 #include "memdetect.h"
-#include "string.h"
+#include <string.h>
 #include "vesa.h"
+#include <mem/pmm.h>
+#include <mem/vmm.h>
+#include <math.h>
 
-#define PIXEL_OFFSET(x, y, pitch, bpp) (y * (pitch / (bpp / 8)) + x)
 #define COLOR(r, g, b) ((b) | (g << 8) | (r << 16))
 
 KernelArgs g_KernelArgs;
-
-typedef void (*KernelEntry)(KernelArgs *kernelArgs);
 u8 *kernel_load_buffer = (u8 *)MEMORY_LOAD_KERNEL;
 u8 *kernel = (u8 *)MEMORY_KERNEL_ADDR;
 
+enum EMemoryBlockTypes
+{
+    MEMORY_BLOCK_FREE = 1,
+    MEMORY_BLOCK_RESERVED = 2,
+    MEMORY_BLOCK_ACPI_RECLAIMABLE = 3,
+    MEMORY_BLOCK_ACPI_NVS = 4,
+    MEMORY_BLOCK_BAD = 5,
+};
+
 void __attribute__((cdecl)) start(u8 disk_id)
 {
-    clear_screen();
-    disable_cursor();
-
     // Initialize disk
     Disk disk;
     if (!disk_init(&disk, disk_id))
     {
-        printf("Failed to initialize disk\n");
+        console_log("Failed to initialize disk\n");
         return;
     }
 
     // Initialize FAT
     if (!fat_init(&disk))
     {
-        printf("Failed to initialize FAT\n");
+        console_log("Failed to initialize FAT\n");
         return;
     }
-
-    // Read kernel from disk into memory
-    FatFile *file = fat_open(&disk, "/kernel.bin");
-    g_KernelArgs.kernelSize = file->size;
-    u32 read;
-    u8 *kernel_buffer = kernel;
-    while ((read = fat_read(&disk, file, MEMORY_LOAD_SIZE, kernel_load_buffer)) > 0)
-    {
-        memcpy(kernel_buffer, kernel_load_buffer, read);
-        kernel_buffer += read;
-    }
-    fat_close(file);
 
     // Initialize VESA
     VbeInfoBlock *info = (VbeInfoBlock *)MEMORY_VBE_INFO_ADDR;
     if (!vbe_get_info(info))
     {
-        printf("Failed to get VBE info\n");
+        console_log("Failed to get VBE info\n");
         return;
     }
 
@@ -78,36 +71,89 @@ void __attribute__((cdecl)) start(u8 disk_id)
     // If no suitable mode was found
     if (mode == 0xffff)
     {
-        printf("Failed to find a suitable VESA mode\n");
+        console_log("Failed to find a suitable VESA mode\n");
         return;
     }
 
     // Set the VESA mode
     if (!vbe_set_mode(mode))
     {
-        printf("Failed to set VESA mode\n");
+        console_log("Failed to set VESA mode\n");
         return;
-    }
-
-    // Draw a test pattern
-    u32 *framebuffer = (u32 *)mode_info->framebuffer;
-    u32 pitch = mode_info->pitch;
-    u32 width = mode_info->width;
-    u32 height = mode_info->height;
-    u32 bpp = mode_info->bpp;
-    i32 x, y;
-    for (y = 0; y < height; y++)
-    {
-        for (x = 0; x < width; x++)
-        {
-            framebuffer[PIXEL_OFFSET(x, y, pitch, bpp)] = COLOR(x * 255 / width, y * 255 / height, 0);
-        }
     }
 
     // Initialize memory
     mem_get_map(&g_KernelArgs.memoryPool);
 
+    // Memory Map
+    MemoryPool *memoryPool = &g_KernelArgs.memoryPool;
+    MemoryBlock *blocks = memoryPool->blocks;
+    u32 count = memoryPool->count;
+    u32 totalMemory = 0;
+    MemoryBlock *largestBlock = NULL;
+    for (u32 i = 0; i < count; i++)
+    {
+        MemoryBlock *block = &blocks[i];
+        totalMemory += block->length;
+        if (block->type == MEMORY_BLOCK_FREE)
+        {
+            if (largestBlock == NULL || block->length > largestBlock->length)
+                largestBlock = block;
+        }
+    }
+
+    // Initialize the Physical Memory Manager
+    pmm_init((u32)MEMORY_PMM_ADDR, totalMemory);
+
+    // Init memory regions with type 1
+    for (u32 i = 0; i < count; i++)
+    {
+        MemoryBlock *block = &blocks[i];
+        if (block->type == MEMORY_BLOCK_FREE)
+        {
+            pmm_init_region(block->base, block->length);
+        }
+    }
+
+    // Read kernel from disk into memory
+    FatFile *file = fat_open(&disk, "/kernel.bin");
+    g_KernelArgs.kernelMemoryInfo.kernelStart = (void *)MEMORY_KERNEL_ADDR;
+    g_KernelArgs.kernelMemoryInfo.kernelSize = file->size;
+    g_KernelArgs.kernelMemoryInfo.kernelEnd = (void *)(MEMORY_KERNEL_ADDR + g_KernelArgs.kernelMemoryInfo.kernelSize * 4);
+
+    // Deinit memory region from 0x0 to kernelEnd
+    pmm_deinit_region(0x0, (u32)g_KernelArgs.kernelMemoryInfo.kernelEnd);
+
+    u32 read;
+    u8 *kernel_buffer = kernel;
+    while ((read = fat_read(&disk, file, MEMORY_LOAD_SIZE, kernel_load_buffer)) > 0)
+    {
+        memcpy(kernel_buffer, kernel_load_buffer, read);
+        kernel_buffer += read;
+    }
+    fat_close(file);
+
+    // Initialize the Virtual Memory Manager
+    if (!vmm_init())
+    {
+        return;
+    }
+
+    // Unmap the kernel lower half
+    for (u32 i = 0x100000; i < 0x400000; i += 4096)
+    {
+        vmm_unmap_page((void *)i);
+    }
+
+    // Flush the TLB
+    __asm__ __volatile__("mov %cr3, %eax; mov %eax, %cr3;");
+
+    // Pass Page Directory to the kernel
+    g_KernelArgs.mmParams.memoryMap = (void *)pmm_get_memory_map();
+    g_KernelArgs.mmParams.maxBlocks = pmm_get_max_blocks();
+    g_KernelArgs.mmParams.usedBlocks = pmm_get_used_blocks();
+    g_KernelArgs.mmParams.pageDirectory = (void *)vmm_get_pdirectory();
+
     // Call the main function of the kernel
-    KernelEntry kmain = (KernelEntry)kernel;
-    kmain(&g_KernelArgs);
+    ((void (*)(KernelArgs *))0xC0000000)(&g_KernelArgs);
 }

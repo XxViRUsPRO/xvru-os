@@ -9,6 +9,7 @@ SOURCES_HEADERS=$(shell find . -type f -name '*.h')
 SOURCES_INCLUDES=$(shell find . -type f -name '*.inc')
 OBJECTS_C=$(patsubst %.c, $(BUILD_DIR)/c/%.o, $(SOURCES_C))
 OBJECTS_ASM=$(patsubst %.asm, $(BUILD_DIR)/asm/%.o, $(SOURCES_ASM))
+EXTERNAL_OBJECTS=$(shell find $(ROOT_DIR)/build/libs -type f -name '*.o')
 
 .PHONY: all clean
 
@@ -17,7 +18,7 @@ all: kernel
 kernel: $(BUILD_DIR)/kernel.bin
 
 $(BUILD_DIR)/kernel.bin: $(OBJECTS_C) $(OBJECTS_ASM)
-	@$(TARGET_LD) $(TARGET_LINKFLAGS) -Wl,-Map=$(BUILD_DIR)/kernel.map -o $@ $^ $(TARGET_LIBS)
+	@$(TARGET_LD) $(TARGET_LINKFLAGS) -Wl,-Map=$(BUILD_DIR)/kernel.map -o $@ $^ $(EXTERNAL_OBJECTS) $(TARGET_LIBS)
 
 $(BUILD_DIR)/c/%.o: %.c $(SOURCES_HEADERS)
 	@echo "Compiling \e[33m\e[4m$<\e[0m..."

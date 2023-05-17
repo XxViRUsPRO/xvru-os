@@ -1,16 +1,8 @@
 #ifndef STDIO_H
 #define STDIO_H
 #include <types.h>
-#include <hal/vfs.h>
 #include <stdarg.h>
-
-#define VIDEO_ADDRESS 0xb8000
-#define MAX_ROWS 25
-#define MAX_COLS 80
-#define DEFAULT_COLOR 0x07
-static u8 cursor_x = 0;
-static u8 cursor_y = 0;
-static u8 *vidmem = (u8 *)VIDEO_ADDRESS;
+#include <hal/vfs.h>
 
 void fputc(fd_t fd, char c);
 void fputs(fd_t fd, const char *str);

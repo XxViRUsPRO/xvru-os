@@ -4,6 +4,21 @@
 
 typedef struct
 {
+    void *pageDirectory;
+    void *memoryMap;
+    u32 maxBlocks;
+    u32 usedBlocks;
+} MemoryManagerParams; // Memory Managers (VMM, PMM) Parameters
+
+typedef struct
+{
+    void *kernelStart;
+    void *kernelEnd;
+    u32 kernelSize;
+} KernelMemoryInfo;
+
+typedef struct
+{
     u64 base;
     u64 length;
     u32 type;
@@ -19,7 +34,8 @@ typedef struct
 typedef struct
 {
     MemoryPool memoryPool;
-    u32 kernelSize;
+    MemoryManagerParams mmParams;
+    KernelMemoryInfo kernelMemoryInfo;
 } KernelArgs;
 
 #endif

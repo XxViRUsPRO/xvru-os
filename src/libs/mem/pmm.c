@@ -31,6 +31,26 @@ u32 pmm_get_free_blocks()
     return pmm_max_blocks - pmm_used_blocks;
 }
 
+u32 *pmm_get_memory_map()
+{
+    return pmm_memory_map;
+}
+
+void pmm_set_memory_map(u32 *memory_map)
+{
+    pmm_memory_map = memory_map;
+}
+
+void pmm_set_max_blocks(u32 max_blocks)
+{
+    pmm_max_blocks = max_blocks;
+}
+
+void pmm_set_used_blocks(u32 used_blocks)
+{
+    pmm_used_blocks = used_blocks;
+}
+
 i32 pmm_first_free_block(u32 num_blocks)
 {
     if (num_blocks == 0)

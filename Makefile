@@ -8,7 +8,7 @@ include toolchain.mk
 
 os: $(BUILD_DIR)/os.img
 
-$(BUILD_DIR)/os.img: bootloader kernel
+$(BUILD_DIR)/os.img: libs bootloader kernel
 	@echo "\e[94mCreating OS image...\e[0m"
 	@dd if=/dev/zero of=$@ bs=512 count=2880 > /dev/null
 	@mkfs.fat -F 12 -n "OS" $@ > /dev/null
@@ -38,6 +38,11 @@ kernel: $(BUILD_DIR)/kernel/kernel.bin
 $(BUILD_DIR)/kernel/kernel.bin: always
 	@echo "\e[35mBuilding kernel...\e[0m"
 	@$(MAKE) -C src/kernel BUILD_DIR=$(abspath $(BUILD_DIR)/kernel) $(MAKEARGS)
+	@echo "\e[32mDone!\e[0m\n"
+
+libs: always
+	@echo "\e[35mBuilding libs...\e[0m"
+	@$(MAKE) -C src/libs BUILD_DIR=$(abspath $(BUILD_DIR)/libs) $(MAKEARGS)
 	@echo "\e[32mDone!\e[0m\n"
 
 run: os

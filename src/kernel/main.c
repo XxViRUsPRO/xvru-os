@@ -6,20 +6,10 @@
 #include <math.h>
 #include <x86.h>
 #include <drivers/timer.h>
+#include <display.h>
 #include <mem/pmm.h>
 #include <mem/vmm.h>
-#include <display.h>
-
-const u32 PMM_MEMORY_MAP_ADDRESS = 0x30000;
-
-enum EMemoryBlockTypes
-{
-    MEMORY_BLOCK_FREE = 1,
-    MEMORY_BLOCK_RESERVED = 2,
-    MEMORY_BLOCK_ACPI_RECLAIMABLE = 3,
-    MEMORY_BLOCK_ACPI_NVS = 4,
-    MEMORY_BLOCK_BAD = 5,
-};
+#include <mem/malloc.h>
 
 void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
 {
@@ -27,71 +17,49 @@ void __attribute__((section(".entry"))) kmain(KernelArgs *kernelArgs)
     HAL_init();
     timer_init();
 
-    // Memory Map
-    MemoryPool *memoryPool = &kernelArgs->memoryPool;
-    MemoryBlock *blocks = memoryPool->blocks;
-    u32 count = memoryPool->count;
-    u32 totalMemory = 0;
-    MemoryBlock *largestBlock = NULL;
-    for (u32 i = 0; i < count; i++)
+    // Use MemoryManagerParams to set up the PMM and VMM
+    MemoryManagerParams *mmParams = &kernelArgs->mmParams;
+    pmm_set_memory_map((u32 *)mmParams->memoryMap);
+    pmm_set_max_blocks(mmParams->maxBlocks);
+    pmm_set_used_blocks(mmParams->usedBlocks);
+    if (!vmm_set_pdirectory((PageDirectory *)mmParams->pageDirectory))
     {
-        MemoryBlock *block = &blocks[i];
-        totalMemory += block->length;
-        if (block->type == MEMORY_BLOCK_FREE)
-        {
-            if (largestBlock == NULL || block->length > largestBlock->length)
-                largestBlock = block;
-        }
-    }
-    fprintf(DEBUG_FD, "Total Memory: %d B (%f MB)\n", totalMemory, totalMemory / 1024 / 1024.0f);
-
-    // Initialize the Physical Memory Manager
-    pmm_init(PMM_MEMORY_MAP_ADDRESS, totalMemory);
-
-    // Init memory regions with type 1
-    for (u32 i = 0; i < count; i++)
-    {
-        MemoryBlock *block = &blocks[i];
-        if (block->type == MEMORY_BLOCK_FREE)
-        {
-            pmm_init_region(block->base, block->length);
-        }
+        PANIC("Failed to set page directory");
     }
 
-    // Reserve the memory from 0x0 to kenrel base which is 0x100000 + kernel size * 4
-    pmm_deinit_region(0, largestBlock->base + (kernelArgs->kernelSize * 4));
+    // Set up intial Malloc list head
+    // u32 mallocVirtAddr = (u32)kernelArgs->kernelMemoryInfo.kernelEnd;
+    u32 mallocVirtAddr = 0x300000;
+    u32 mallocPhysAddr = (u32)pmm_alloc_blocks(1);
+    u32 totalMallocPages = 1;
 
-    // Initialize the Virtual Memory Manager
-    if (!vmm_init())
-    {
-        return;
-    }
+    vmm_map_page((void *)mallocPhysAddr, (void *)mallocVirtAddr);
+    pt_entry_t *page = vmm_get_page((void *)mallocVirtAddr);
+    page->rw = 1;
 
+    malloc_block_t *mallocListHead = (malloc_block_t *)mallocVirtAddr;
+    mallocListHead->size = (totalMallocPages * MALLOC_PAGE_SIZE) - sizeof(malloc_block_t);
+    mallocListHead->free = true;
+    mallocListHead->next = 0;
+
+    malloc_set_params(mallocListHead, mallocVirtAddr, mallocPhysAddr, totalMallocPages);
+
+    // Initialize the display
     // Map the framebuffer region
-    const u32 fb_size = 800 * 600 * 4;
+    u32 *fb = (u32 *)0xfd000000;
+    const u32 fb_size = 800 * 600 * (32 / 8);
     u32 fb_size_pages = ceil((double)fb_size / 4096);
     fb_size_pages *= 2;
-    for (u32 i = 0, fb_start = 0xfd000000; i < fb_size_pages; i++, fb_start += 4096)
+    for (u32 i = 0, fb_start = (u32)fb; i < fb_size_pages; i++, fb_start += 4096)
     {
         vmm_map_page((void *)fb_start, (void *)fb_start);
     }
 
     // Deinit the framebuffer region
-    u32 *fb = (u32 *)0xfd000000;
     pmm_deinit_region((u32)fb, fb_size_pages * 4096);
 
-    // Unmap the kernel lower half
-    // for (u32 i = 0x100000; i < 0x400000; i += 4096)
-    // {
-    //     vmm_unmap_page((void *)i);
-    // }
-    // vmm_unmap_page((void *)0x100000);
-
-    // Flush the TLB
-    __asm__ __volatile__("mov %cr3, %eax; mov %eax, %cr3;");
-
-    display_init((void *)fb, 800, 600, 800 * 4, 32);
-    display_clear(0x0000ff00);
+    display_init(fb, 800, 600, 800, 32);
+    display_clear(COLOR(255, 255, 0));
     display_render();
 
     // Infinite loop to prevent the kernel from exiting

@@ -1,7 +1,7 @@
 #ifndef IRQ_H
 #define IRQ_H
 #include <types.h>
-#include "isr.h"
+#include "isr/isr.h"
 
 typedef void (*IRQ_handler_t)(Registers *regs);
 

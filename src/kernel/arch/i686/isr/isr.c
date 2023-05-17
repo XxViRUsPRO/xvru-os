@@ -1,6 +1,7 @@
 #include "isr.h"
-#include "idt.h"
-#include "gdt.h"
+#include "handlers.h"
+#include "../idt.h"
+#include "../gdt.h"
 #include <string.h>
 #include <stdio.h>
 #include <x86.h>
@@ -566,18 +567,23 @@ void ISR_init(void)
         IDT_enable_gate(interrupt);
     }
     IDT_disable_gate(0x80);
+    ISR_handlers_init();
 }
 
 void __attribute__((cdecl)) ISR_handler(Registers *regs)
 {
     if (ISR_handlers[regs->int_no] != NULL)
+    {
         ISR_handlers[regs->int_no](regs);
-
-    else if (regs->int_no >= 32)
+    }
+    else if (regs->int_no == 32)
+    {
+        // do nothing for timer interrupt
+    }
+    else if (regs->int_no > 32)
     {
         printf("Unhandled interrupt %d!\n", regs->int_no);
     }
-
     else
     {
         printf("Unhandled exception %d %s\n", regs->int_no, EXCEPTIONS[regs->int_no]);
@@ -590,9 +596,7 @@ void __attribute__((cdecl)) ISR_handler(Registers *regs)
 
         printf("  interrupt=%x  errorcode=%x\n", regs->int_no, regs->err_code);
 
-        printf("KERNEL PANIC!\n");
-
-        panic();
+        PANIC("Unhandled exception");
     }
 }
 

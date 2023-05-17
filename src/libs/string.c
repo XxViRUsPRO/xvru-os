@@ -1,5 +1,4 @@
-#include "string.h"
-#include "math.h"
+#include "types.h"
 
 void *memcpy(void *dest, const void *src, size_t count)
 {
@@ -35,6 +34,18 @@ void *memmove(void *dest, const void *src, size_t count)
     return dest;
 }
 
+int memcmp(const void *s1, const void *s2, size_t n)
+{
+    const u8 *p1 = (const u8 *)s1, *p2 = (const u8 *)s2;
+    while (n--)
+    {
+        if (*p1 != *p2)
+            return *p1 - *p2;
+        p1++, p2++;
+    }
+    return 0;
+}
+
 size_t strlen(const char *s)
 {
     size_t len = 0;
@@ -60,4 +71,12 @@ char *strcat(char *dest, const char *src)
         dest[dest_len + i] = src[i];
     dest[dest_len + i] = '\0';
     return dest;
+}
+
+char *strchr(const char *str, int c)
+{
+    while (*str != (char)c)
+        if (!*str++)
+            return 0;
+    return (char *)str;
 }

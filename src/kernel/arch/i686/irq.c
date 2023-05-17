@@ -25,8 +25,10 @@ void IRQ_init()
 {
     PIC_config(PIC_REMAP_OFFSET, PIC_REMAP_OFFSET + 8);
 
-    for (u8 i = 0; i < 16; i++)
+    for (u8 i = 1; i < 16; i++)
+    {
         ISR_install(PIC_REMAP_OFFSET + i, IRQ_handler);
+    }
 
     sti();
 }

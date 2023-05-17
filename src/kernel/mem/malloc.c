@@ -1,6 +1,7 @@
 #include "malloc.h"
-#include "vmm.h"
-#include "pmm.h"
+#include <mem/vmm.h>
+#include <mem/pmm.h>
+#include <stdio.h>
 
 malloc_block_t *malloc_list_head = 0;
 u32 malloc_virt_address = 0;
@@ -10,6 +11,14 @@ u32 total_malloc_pages = 0;
 malloc_block_t *malloc_get_list_head()
 {
     return malloc_list_head;
+}
+
+void malloc_set_params(malloc_block_t *head, u32 virt, u32 phys, u32 pages)
+{
+    malloc_list_head = head;
+    malloc_virt_address = virt;
+    malloc_phys_address = phys;
+    total_malloc_pages = pages;
 }
 
 void malloc_init(u32 bytes)
@@ -27,7 +36,7 @@ void malloc_init(u32 bytes)
 
         pt_entry_t *page = vmm_get_page((void *)virt);
 
-        SET_ATTRIB(page, PTE_WRITABLE);
+        page->rw = 1;
     }
 
     if (malloc_list_head)
@@ -41,7 +50,6 @@ void malloc_init(u32 bytes)
 void malloc_split(malloc_block_t *node, u32 size)
 {
     malloc_block_t *new_node = (malloc_block_t *)((void *)node + size + sizeof(malloc_block_t));
-
     new_node->size = node->size - size - sizeof(malloc_block_t);
     new_node->free = true;
     new_node->next = node->next;
@@ -78,24 +86,24 @@ void *malloc_next_block(u32 size)
     }
     else
     {
-        u8 num_pages = 1;
+        u32 num_pages = 1;
+
         while (cur->size + num_pages * MALLOC_PAGE_SIZE < size + sizeof(malloc_block_t))
             num_pages++;
 
         u32 virt = malloc_virt_address + total_malloc_pages * MALLOC_PAGE_SIZE;
 
-        for (u8 i = 0; i < num_pages; i++)
+        for (u32 i = 0; i < num_pages; i++)
         {
-            pt_entry_t page = 0;
+            pt_entry_t page = {0};
             u32 *temp = vmm_alloc_page(&page);
 
             vmm_map_page((void *)temp, (void *)virt);
-            SET_ATTRIB(&page, PTE_WRITABLE);
+            page.rw = 1;
             virt += MALLOC_PAGE_SIZE;
             cur->size += MALLOC_PAGE_SIZE;
             total_malloc_pages++;
         }
-
         malloc_split(cur, size);
     }
 

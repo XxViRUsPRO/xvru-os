@@ -1,11 +1,9 @@
 #include "vmm.h"
 #include "pmm.h"
-#include <x86.h>
 #include <string.h>
+#include <memdefs.h>
 
-const u32 KERNEL_ADDR = 0x100000;
-
-PageDirectory *vmm_current_directory = 0;
+PageDirectory *vmm_current_directory = NULL;
 
 pt_entry_t *ptable_lookup_entry(PageTable *p, u32 addr)
 {
@@ -21,19 +19,24 @@ pd_entry_t *pdirectory_lookup_entry(PageDirectory *p, u32 addr)
     return 0;
 }
 
-bool vmm_set_pdirectory(PageDirectory *p)
+bool vmm_set_pdirectory(PageDirectory *pd)
 {
-    if (!p)
+    if (!pd)
         return false;
 
-    vmm_current_directory = p;
-    x86_load_pdbr(p);
+    vmm_current_directory = pd;
+    __asm__ __volatile__("movl %%eax, %%cr3" ::"a"(vmm_current_directory));
     return true;
+}
+
+PageDirectory *vmm_get_pdirectory()
+{
+    return vmm_current_directory;
 }
 
 void vmm_flush_tlb(void *virt)
 {
-    x86_flush_tlb(virt);
+    __asm__ __volatile__("cli; invlpg (%0); sti" ::"r"(virt));
 }
 
 bool vmm_init()
@@ -46,7 +49,7 @@ bool vmm_init()
     // clear page directory
     memset(directory, 0, sizeof(PageDirectory));
     for (i32 i = 0; i < 1024; i++)
-        directory->entries[i] = PTE_WRITABLE;
+        directory->entries[i].rw = 1;
 
     // allocate default page table (0 - 4MB)
     PageTable *table = (PageTable *)pmm_alloc_blocks(1);
@@ -66,43 +69,43 @@ bool vmm_init()
     for (i32 i = 0, frame = 0x0, virt = 0x0; i < 1024; i++, frame += VMM_PAGE_SIZE, virt += VMM_PAGE_SIZE)
     {
         // create a new page
-        pt_entry_t page = 0;
-        SET_ATTRIB(&page, PTE_PRESENT);
-        SET_ATTRIB(&page, PTE_WRITABLE);
-        SET_FRAME(&page, frame);
+        pt_entry_t page = {0};
+        page.present = 1;
+        page.rw = 1;
+        page.frame = ((u32)frame) >> 12;
 
         // ...and add it to the page table
         table3gb->entries[PT_INDEX(virt)] = page;
     }
 
     // map 1mb to 3gb
-    for (i32 i = 0, frame = KERNEL_ADDR, virt = 0xC0000000; i < 1024; i++, frame += VMM_PAGE_SIZE, virt += VMM_PAGE_SIZE)
+    for (i32 i = 0, frame = MEMORY_KERNEL_ADDR, virt = 0xC0000000; i < 1024; i++, frame += VMM_PAGE_SIZE, virt += VMM_PAGE_SIZE)
     {
         // create a new page
-        pt_entry_t page = 0;
-        SET_ATTRIB(&page, PTE_PRESENT);
-        SET_ATTRIB(&page, PTE_WRITABLE);
-        SET_FRAME(&page, frame);
+        pt_entry_t page = {0};
+        page.present = 1;
+        page.rw = 1;
+        page.frame = ((u32)frame) >> 12;
 
         // ...and add it to the page table
         table->entries[PT_INDEX(virt)] = page;
     }
 
-    pd_entry_t *entry = &directory->entries[PD_INDEX(0xc0000000)];
-    SET_ATTRIB(entry, PDE_PRESENT);
-    SET_ATTRIB(entry, PDE_WRITABLE);
-    SET_FRAME(entry, (u32)table);
+    pd_entry_t *entry = &directory->entries[PD_INDEX(0xC0000000)];
+    entry->present = 1;
+    entry->rw = 1;
+    entry->frame = ((u32)table) >> 12;
 
     pd_entry_t *entry3gb = &directory->entries[PD_INDEX(0x00000000)];
-    SET_ATTRIB(entry3gb, PDE_PRESENT);
-    SET_ATTRIB(entry3gb, PDE_WRITABLE);
-    SET_FRAME(entry3gb, (u32)table3gb);
+    entry3gb->present = 1;
+    entry3gb->rw = 1;
+    entry3gb->frame = ((u32)table3gb) >> 12;
 
     // switch to our page directory
     vmm_set_pdirectory(directory);
 
     // enable paging
-    x86_enable_paging();
+    __asm__ __volatile__("movl %cr0, %eax; orl $0x80000001, %eax; movl %eax, %cr0");
 
     return true;
 }
@@ -112,45 +115,43 @@ void *vmm_alloc_page(pt_entry_t *e)
     void *p = pmm_alloc_blocks(1);
     if (p)
     {
-        SET_FRAME(e, (u32)p);
-        SET_ATTRIB(e, PTE_PRESENT);
+        e->present = 1;
+        e->frame = (u32)p;
     }
     return p;
 }
 
 void vmm_free_page(pt_entry_t *e)
 {
-    void *p = (void *)PAGE_GET_PHYSICAL_ADDRESS(e);
+    void *p = (void *)PF_INDEX(e);
     if (p)
         pmm_free_blocks(p, 1);
-    CLEAR_ATTRIB(e, PTE_PRESENT);
+    e->present = 0;
 }
 
 bool vmm_map_page(void *phys, void *virt)
 {
-    PageDirectory *pageDirectory = vmm_current_directory;
+    PageDirectory *pageDirectory = vmm_get_pdirectory();
     pd_entry_t *pde = &pageDirectory->entries[PD_INDEX((u32)virt)];
-    if ((*pde & PTE_PRESENT) != PTE_PRESENT)
+    if (!pde->present)
     {
         PageTable *table = (PageTable *)pmm_alloc_blocks(1);
         if (!table)
             return false;
 
         memset(table, 0, sizeof(PageTable));
-
         pd_entry_t *entry = &pageDirectory->entries[PD_INDEX((u32)virt)];
 
-        SET_ATTRIB(entry, PDE_PRESENT);
-        SET_ATTRIB(entry, PDE_WRITABLE);
-        SET_FRAME(entry, (u32)table);
+        entry->present = 1;
+        entry->rw = 1;
+        entry->frame = ((u32)table) >> 12;
     }
-
-    PageTable *table = (PageTable *)PAGE_GET_PHYSICAL_ADDRESS(pde);
+    PageTable *table = (PageTable *)PF_INDEX(pde);
 
     pt_entry_t *entry = &table->entries[PT_INDEX((u32)virt)];
 
-    SET_ATTRIB(entry, PTE_PRESENT);
-    SET_FRAME(entry, (u32)phys);
+    entry->present = 1;
+    entry->frame = ((u32)phys) >> 12;
 
     return true;
 }
@@ -159,15 +160,15 @@ void vmm_unmap_page(void *virt)
 {
     pt_entry_t *entry = vmm_get_page(virt);
 
-    SET_FRAME(entry, 0x0);
-    CLEAR_ATTRIB(entry, PTE_PRESENT);
+    entry->present = 0;
+    entry->frame = 0;
 }
 
 pt_entry_t *vmm_get_page(void *virt)
 {
     PageDirectory *pageDirectory = vmm_current_directory;
     pd_entry_t *pde = &pageDirectory->entries[PD_INDEX((u32)virt)];
-    PageTable *table = (PageTable *)PAGE_GET_PHYSICAL_ADDRESS(pde);
+    PageTable *table = (PageTable *)PF_INDEX(pde);
     pt_entry_t *entry = &table->entries[PT_INDEX((u32)virt)];
     return entry;
 }

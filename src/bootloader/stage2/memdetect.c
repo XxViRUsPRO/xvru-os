@@ -1,7 +1,7 @@
 #include "memdetect.h"
-#include "string.h"
 #include "x86.h"
 #include <types.h>
+#include <string.h>
 
 #define MAX_MEMORY_ENTRIES 256
 

@@ -1,6 +1,7 @@
 #include "display.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 static void *g_FrameBuffer = NULL;
 static void *g_DoubleBuffer = NULL;
@@ -12,6 +13,14 @@ static u32 g_Pitch = 0;
 static u32 g_BitsPerPixel = 0;
 static u32 g_SizeOfPixel = 0;
 
+void *memset_i32(void *dest, i32 val, size_t count)
+{
+    i32 *temp = (i32 *)dest;
+    for (; count != 0; count--)
+        *temp++ = val;
+    return dest;
+}
+
 void display_init(void *framebuffer, u32 width, u32 height, u32 pitch, u32 bpp)
 {
     if (framebuffer == NULL)
@@ -22,8 +31,8 @@ void display_init(void *framebuffer, u32 width, u32 height, u32 pitch, u32 bpp)
     g_FrameBuffer = framebuffer;
     g_SizeOfPixel = bpp / 8;
     g_BufferSize = width * height * g_SizeOfPixel;
-    // g_DoubleBuffer = malloc(g_BufferSize * 2);
-    g_DoubleBuffer = g_FrameBuffer;
+    g_DoubleBuffer = malloc(g_BufferSize * 2);
+    // g_DoubleBuffer = g_FrameBuffer;
     if (g_DoubleBuffer == NULL)
     {
         return;
@@ -37,7 +46,7 @@ void display_init(void *framebuffer, u32 width, u32 height, u32 pitch, u32 bpp)
 
 void display_clear(u32 color)
 {
-    memset(g_DoubleBuffer + g_DoubleBufferIndex, color, g_BufferSize);
+    memset_i32(g_DoubleBuffer + g_DoubleBufferIndex, color, g_BufferSize / 4);
 }
 
 void display_draw_pixel(u32 x, u32 y, u32 color)

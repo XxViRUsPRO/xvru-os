@@ -1,5 +1,4 @@
 #include "timer.h"
-#include <arch/i686/isr.h>
 #include <arch/i686/irq.h>
 #include <x86.h>
 

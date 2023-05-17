@@ -2,7 +2,7 @@
 #define DISPLAY_H
 #include <types.h>
 
-#define PIXEL_OFFSET(x, y) ((x) + (y)*g_Pitch / (g_BitsPerPixel / 8))
+#define PIXEL_OFFSET(x, y) ((x) + (y)*g_Pitch)
 #define COLOR(r, g, b) ((r) << 16 | (g) << 8 | (b))
 
 void display_init(void *framebuffer, u32 width, u32 height, u32 pitch, u32 bpp);

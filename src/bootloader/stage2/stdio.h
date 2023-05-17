@@ -18,4 +18,8 @@ void sprintf(char *str, const char *fmt, ...);
 void printf(const char *fmt, ...);
 int itoa(int value, char *buffer, int base);
 
+#if 1
+void console_log(const char *fmt, ...);
+#endif
+
 #endif
